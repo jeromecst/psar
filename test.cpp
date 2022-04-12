@@ -51,9 +51,8 @@ static void BM_PageCache(benchmark::State& state)
 	close(fd);
 
 	setaffinity(state.range(0));
-	for(int i = 0; i < 100; i++) {
-		read_file();
-	}
+	/* only one read will fill the page cache */
+	read_file();
 
 	setaffinity(state.range(1));
 	for (auto _ : state) {
