@@ -68,4 +68,33 @@ BENCHMARK(BM_PageCache)
     ->Unit(benchmark::kMillisecond)
 ;
 
+/*
+BENCHMARK(BM_PageCache)
+    ->Args({0, 0})
+    ->Args({0, 2})
+    ->Args({0, 4})
+    ->Args({0, 6})
+    ->Args({0, 8})
+    ->Args({0, 10})
+    ->Args({0, 12})
+    ->Args({0, 14})
+    ->Args({0, 16})
+    ->Args({0, 18})
+    ->Args({0, 22})
+    ->Args({0, 1})
+    ->Args({0, 3})
+    ->Args({0, 5})
+    ->Args({0, 7})
+    ->Args({0, 9})
+    ->Args({0, 11})
+    ->Args({0, 13})
+    ->Args({0, 15})
+    ->Args({0, 17})
+    ->Args({0, 19})
+    ->Args({0, 21})
+    ->Args({0, 23})
+    ->Unit(benchmark::kMillisecond)
+;
+*/
+
 BENCHMARK_MAIN();
