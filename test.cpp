@@ -62,15 +62,6 @@ static void BM_PageCache(benchmark::State& state)
 
 BENCHMARK(BM_PageCache)
     ->Args({0, 0})
-    ->Args({0, 1})
-    ->Args({0, 2})
-    ->Args({0, 3})
-    ->Unit(benchmark::kMillisecond)
-;
-
-/*
-BENCHMARK(BM_PageCache)
-    ->Args({0, 0})
     ->Args({0, 2})
     ->Args({0, 4})
     ->Args({0, 6})
@@ -95,6 +86,5 @@ BENCHMARK(BM_PageCache)
     ->Args({0, 23})
     ->Unit(benchmark::kMillisecond)
 ;
-*/
 
 BENCHMARK_MAIN();
