@@ -9,11 +9,14 @@
 #include <iostream>
 
 #define NCPU 128
+#define NUMA 4
+/* buffer size is 256KiB */
+#define SIZE 262144
 
-static void read_file(char *buf, ssize_t size)
+static void read_file(char *buf)
 {
 	struct stat st; 
-	char buffer[size];
+	char buffer[SIZE];
 
 	if (buf == nullptr) {
 		buf = buffer;
@@ -30,7 +33,7 @@ static void read_file(char *buf, ssize_t size)
 	}
 	int sum = 0;
 	int sz;
-	while((sz = read(fd, buf, size)) > 0) {
+	while((sz = read(fd, buf, SIZE)) > 0) {
 		sum += sz;
 	}
 	if (sum != st.st_size) {
@@ -40,30 +43,46 @@ static void read_file(char *buf, ssize_t size)
 	close(fd);
 }
 
-static void setaffinity(int ncore)
+static void setaffinity_node(int node)
 {
 	cpu_set_t cpuset;
 	CPU_ZERO(&cpuset);
-	CPU_SET(ncore, &cpuset);
+	for (int i = node; i < NCPU; i += NUMA) {
+		CPU_SET(i, &cpuset);
+	}
 	pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset);
 }
+
+/* static void setaffinity(int ncore) */
+/* { */
+/* 	cpu_set_t cpuset; */
+/* 	CPU_ZERO(&cpuset); */
+/* 	CPU_SET(ncore, &cpuset); */
+/* 	pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset); */
+/* } */
+
+/* overloaded with 2 args *1/
+/* static void setaffinity(int ncore, int ncore2) */
+/* { */
+/* 	cpu_set_t cpuset; */
+/* 	CPU_ZERO(&cpuset); */
+/* 	CPU_SET(ncore, &cpuset); */
+/* 	CPU_SET(ncore2, &cpuset); */
+/* 	pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset); */
+/* } */
 
 static void setaffinity_any()
 {
 	unsigned int cpu;
-	if (getcpu(&cpu, nullptr) < 0) {
-		perror("getcpu");
-		exit(1);
-	}
-	cpu_set_t *cpuset = CPU_ALLOC(NCPU);
+	cpu_set_t cpuset;
 	for (unsigned int i = 0; i < NCPU; i++) {
-		CPU_SET(i, cpuset);
+		CPU_SET(i, &cpuset);
 	}
-	pthread_setaffinity_np(pthread_self(), sizeof(cpuset), cpuset);
+	pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset);
 }
 
 static void CustomArguments(benchmark::internal::Benchmark* b) {
-	for (int j = 0; j < NCPU; j += 1)
+	for (int j = 0; j < NUMA; j += 1)
 		b->Args({0, j});
 }
 

@@ -1,10 +1,6 @@
 #include <benchmark/benchmark.h>
 #include "test.h"
 
-#define NCPU 128
-/* buffer size is 256KiB */
-#define SIZE 262144
-
 static void BM_PageCache(benchmark::State& state)
 {
 	int fd = open("/proc/sys/vm/drop_caches", O_WRONLY);
@@ -13,13 +9,21 @@ static void BM_PageCache(benchmark::State& state)
 	}
 	close(fd);
 
-	setaffinity(state.range(0));
 	/* only one read will fill the page cache */
-	read_file(nullptr, SIZE);
+	/* read on CPU X (only NUMA node 0) */
+	setaffinity_node(state.range(0));
+	read_file(nullptr);
 
-	setaffinity(state.range(1));
+	/* allocate and fill a buffer on CPU Y */
+	setaffinity_node(state.range(1));
+	char *buf = new char[SIZE];
+	memset(buf, 0, SIZE);
+	for (int i = 0; i < SIZE; i++) {
+		buf[i] = i;
+	}
+	
 	for (auto _ : state) {
-		read_file(nullptr, SIZE);
+		read_file(buf);
 	}
 }
 

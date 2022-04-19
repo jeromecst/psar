@@ -28,7 +28,7 @@ def json_plot(json_dic, nnode, name):
 
 
 numa = 4
-for f in ["yeti/test_result.js", "yeti/test2_result.js"]:
+for f in ["yeti/test_result.json", "yeti/test2_result.json"]:
     path = directory + f
     if os.path.isfile(path):
         json_file = open(path)
