@@ -18,20 +18,19 @@ def plottime(rtime, cputime, method, name):
         ax[i].set_ylabel(f"{time} (ms)")
     fig.savefig(name + "_rtime.png")
 
-def json_plot(json_dic, nnode, name):
-    r_time = [i["real_time"] for i in json_string["benchmarks"]]
-    r_time = [r_time[i::nnode] for i in range(nnode)]
-    cpu_time = [i["cpu_time"] for i in json_string["benchmarks"]]
-    cpu_time = [cpu_time[i::nnode] for i in range(nnode)]
+def json_plot(json_dic, name):
+    # 2D array containing time[] for each numa node
+    # len(time) should be equal to number of numa node
+    r_time = [i["r_time"] for i in json_string]
+    cpu_time = [i["cpu_time"] for i in json_string]
     plottime(r_time, cpu_time, plt.violinplot, name + "_violin")
     plottime(r_time, cpu_time, plt.boxplot, name + "_bar")
 
 
-numa = 4
 for f in ["yeti/test_result.json", "yeti/test2_result.json"]:
     path = directory + f
     if os.path.isfile(path):
         json_file = open(path)
         json_string = json.load(json_file)
-        json_plot(json_string, numa, "plot/" + str(f))
+        json_plot(json_string, "plot/" + str(f))
         json_file.close()
