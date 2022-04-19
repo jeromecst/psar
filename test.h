@@ -8,8 +8,7 @@
 #include <cstring>
 #include <iostream>
 
-#define NCPU 127
-
+#define NCPU 128
 
 static void read_file(char *buf, ssize_t size)
 {
@@ -64,7 +63,7 @@ static void setaffinity_any()
 }
 
 static void CustomArguments(benchmark::internal::Benchmark* b) {
-	for (int j = 0; j <= NCPU; j += 1)
+	for (int j = 0; j < NCPU; j += 1)
 		b->Args({0, j});
 }
 
