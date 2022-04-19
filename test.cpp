@@ -1,8 +1,9 @@
 #include <benchmark/benchmark.h>
 #include "test.h"
 
-#define NCPU 127
-#define SIZE 32768
+#define NCPU 128
+/* buffer size is 256KiB */
+#define SIZE 262144
 
 static void BM_PageCache(benchmark::State& state)
 {
