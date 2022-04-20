@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdio>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -45,5 +46,43 @@ struct BenchmarkResult {
 
   std::vector<Measurements> measurements;
 };
+
+struct BenchmarkReadsSimpleConfig {
+  bool set_affinity_any = false;
+  int init_core = 0;
+  int num_iterations = 300;
+};
+
+template <BenchmarkReadsSimpleConfig config>
+inline void benchmark_reads_simple(const std::string &output_file) {
+  const auto num_nodes = get_num_nodes();
+
+  BenchmarkResult result;
+  result.measurements.reserve(num_nodes);
+
+  // fill the page cache on core InitCore -- one read is enough
+  drop_caches();
+  auto read_buffer = make_read_buffer();
+  setaffinity_node(config.init_core);
+  read_file(read_buffer.data(), read_buffer.size());
+
+  for (unsigned int node = 0; node < num_nodes; ++node) {
+    if constexpr (config.set_affinity_any)
+      setaffinity_any();
+    else
+      setaffinity_node(node);
+
+    std::vector<long> times(config.num_iterations);
+    for (int i = 0; i < config.num_iterations; ++i) {
+      times[i] =
+          time_us([&] { read_file(read_buffer.data(), read_buffer.size()); });
+    }
+
+    std::cout << config.init_core << '/' << node << '\n';
+    result.add_measurements(config.init_core, node, std::move(times));
+  }
+
+  result.save(output_file);
+}
 
 } // namespace psar
