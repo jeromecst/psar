@@ -98,10 +98,7 @@ inline void benchmark_reads_simple(const std::string &output_file) {
   }
 
   for (unsigned int node = 0; node < num_nodes; ++node) {
-    if constexpr (config.set_affinity_any)
-      setaffinity_any();
-    else
-      setaffinity_node(node);
+    setaffinity_node(node);
 
     auto read_buffer = [] {
       if constexpr (config.buffer_location == BufferLocation::OnLocalNode) {
@@ -111,6 +108,9 @@ inline void benchmark_reads_simple(const std::string &output_file) {
         return make_read_buffer(config.init_core);
       }
     }();
+
+    if constexpr (config.set_affinity_any)
+      setaffinity_any();
 
     std::vector<long> times(config.num_iterations);
     for (int i = 0; i < config.num_iterations; ++i) {
