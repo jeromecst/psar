@@ -40,15 +40,31 @@ void drop_caches() {
   close(fd);
 }
 
-std::vector<char> make_read_buffer() {
+LocalNumaBuffer::LocalNumaBuffer(size_t size) {
+  if (size == 0)
+    return;
+
+  void *data = numa_alloc_local(size);
+  if (data == nullptr)
+    throw std::bad_alloc();
+
+  buffer = {static_cast<char *>(data), size};
+}
+
+LocalNumaBuffer::~LocalNumaBuffer() {
+  if (buffer.data() != nullptr)
+    numa_free(buffer.data(), buffer.size());
+}
+
+LocalNumaBuffer make_local_read_buffer() {
   struct stat st {};
   if (stat(TestFileName, &st) != 0) {
     perror("stat");
     exit(1);
   }
 
-  std::vector<char> buffer(st.st_size);
-  std::fill(buffer.begin(), buffer.end(), 0xff);
+  LocalNumaBuffer buffer(st.st_size);
+  std::fill(buffer.buffer.begin(), buffer.buffer.end(), 0xff);
   return buffer;
 }
 

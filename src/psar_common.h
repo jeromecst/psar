@@ -3,14 +3,35 @@
 #include <chrono>
 #include <cstdio>
 #include <iostream>
+#include <span>
 #include <string>
 #include <vector>
 
 namespace psar {
 
+struct LocalNumaBuffer {
+  explicit LocalNumaBuffer(size_t size);
+  ~LocalNumaBuffer();
+  LocalNumaBuffer(const LocalNumaBuffer &) = delete;
+  auto operator=(const LocalNumaBuffer &) = delete;
+  LocalNumaBuffer(LocalNumaBuffer &&other) noexcept {
+    buffer = std::exchange(other.buffer, {});
+  }
+  LocalNumaBuffer &operator=(LocalNumaBuffer &&other) noexcept {
+    if (this != &other)
+      buffer = std::exchange(other.buffer, {});
+    return *this;
+  }
+
+  auto data() const { return buffer.data(); }
+  auto size() const { return buffer.size(); }
+
+  std::span<char> buffer;
+};
+
 void drop_caches();
 
-std::vector<char> make_read_buffer();
+LocalNumaBuffer make_local_read_buffer();
 
 void read_file(char *buf, size_t buf_size);
 
@@ -62,15 +83,19 @@ inline void benchmark_reads_simple(const std::string &output_file) {
 
   // fill the page cache on core InitCore -- one read is enough
   drop_caches();
-  auto read_buffer = make_read_buffer();
-  setaffinity_node(config.init_core);
-  read_file(read_buffer.data(), read_buffer.size());
+  {
+    setaffinity_node(config.init_core);
+    auto read_buffer = make_local_read_buffer();
+    read_file(read_buffer.data(), read_buffer.size());
+  }
 
   for (unsigned int node = 0; node < num_nodes; ++node) {
     if constexpr (config.set_affinity_any)
       setaffinity_any();
     else
       setaffinity_node(node);
+
+    auto read_buffer = make_local_read_buffer();
 
     std::vector<long> times(config.num_iterations);
     for (int i = 0; i < config.num_iterations; ++i) {
