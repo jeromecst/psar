@@ -43,6 +43,7 @@ void setaffinity_any();
 
 unsigned int get_num_cores();
 unsigned int get_num_nodes();
+unsigned int get_current_node();
 
 template <typename Fn> long time_us(const Fn &fn) {
   // libstdc++ and libc++ both use clock_gettime(CLOCK_MONOTONIC) on POSIX
@@ -60,10 +61,13 @@ struct BenchmarkResult {
     unsigned int read_node;
     /// times in us
     std::vector<long> times_us;
+    /// the active node at the end of each sample
+    std::vector<unsigned int> nodes;
   };
 
   void add_measurements(unsigned int init_core, unsigned int read_core,
-                        std::vector<long> times);
+                        std::vector<long> times,
+                        std::vector<unsigned int> nodes);
 
   void save(const std::string &output_file);
 
@@ -113,13 +117,16 @@ inline void benchmark_reads_simple(const std::string &output_file) {
       setaffinity_any();
 
     std::vector<long> times(config.num_iterations);
+    std::vector<unsigned int> nodes(config.num_iterations);
     for (int i = 0; i < config.num_iterations; ++i) {
       times[i] =
           time_us([&] { read_file(read_buffer.data(), read_buffer.size()); });
+      nodes[i] = get_current_node();
     }
 
     std::cout << config.init_core << '/' << node << '\n';
-    result.add_measurements(config.init_core, node, std::move(times));
+    result.add_measurements(config.init_core, node, std::move(times),
+                            std::move(nodes));
   }
 
   result.save(output_file);
