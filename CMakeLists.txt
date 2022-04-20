@@ -26,8 +26,8 @@ target_include_directories(psar_common PUBLIC lib/)
 target_link_libraries(psar_common PUBLIC pthread numa)
 target_link_libraries(psar_common PRIVATE nlohmann_json::nlohmann_json)
 
-add_executable(test1 src/test1.cpp)
+add_executable(test1 src/test_distant_reads_distant_buffer_forced.cpp)
 target_link_libraries(test1 PRIVATE psar_common)
 
-add_executable(test2 src/test2.cpp)
+add_executable(test2 src/test_distant_reads_distant_buffer.cpp)
 target_link_libraries(test2 PRIVATE psar_common)
