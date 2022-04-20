@@ -40,7 +40,7 @@ void drop_caches() {
   close(fd);
 }
 
-LocalNumaBuffer::LocalNumaBuffer(size_t size) {
+NumaBuffer::NumaBuffer(size_t size) {
   if (size == 0)
     return;
 
@@ -51,19 +51,42 @@ LocalNumaBuffer::LocalNumaBuffer(size_t size) {
   buffer = {static_cast<char *>(data), size};
 }
 
-LocalNumaBuffer::~LocalNumaBuffer() {
+NumaBuffer::NumaBuffer(unsigned int node, size_t size) {
+  if (size == 0)
+    return;
+
+  void *data = numa_alloc_onnode(size, int(node));
+  if (data == nullptr)
+    throw std::bad_alloc();
+
+  buffer = {static_cast<char *>(data), size};
+}
+
+NumaBuffer::~NumaBuffer() {
   if (buffer.data() != nullptr)
     numa_free(buffer.data(), buffer.size());
 }
 
-LocalNumaBuffer make_local_read_buffer() {
+NumaBuffer make_local_read_buffer() {
   struct stat st {};
   if (stat(TestFileName, &st) != 0) {
     perror("stat");
     exit(1);
   }
 
-  LocalNumaBuffer buffer(st.st_size);
+  NumaBuffer buffer(st.st_size);
+  std::fill(buffer.buffer.begin(), buffer.buffer.end(), 0xff);
+  return buffer;
+}
+
+NumaBuffer make_read_buffer(unsigned int node) {
+  struct stat st {};
+  if (stat(TestFileName, &st) != 0) {
+    perror("stat");
+    exit(1);
+  }
+
+  NumaBuffer buffer(node, st.st_size);
   std::fill(buffer.buffer.begin(), buffer.buffer.end(), 0xff);
   return buffer;
 }
