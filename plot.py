@@ -11,7 +11,7 @@ def plottime(rtime, cputime, name):
     for i, time in enumerate(["real time", "cpu time"]):
         ax[i].set_title(f"{time} for each numa")
         ax[i].set_xlabel("numa node")
-        ax[i].set_ylabel(f"{time} (ms)")
+        ax[i].set_ylabel(f"{time} ($\mu s$)")
     fig.savefig(name + "_rtime.png")
 
 def json_plot(json_dic, name, warmup):
