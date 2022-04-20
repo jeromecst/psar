@@ -9,15 +9,16 @@
 
 namespace psar {
 
-struct LocalNumaBuffer {
-  explicit LocalNumaBuffer(size_t size);
-  ~LocalNumaBuffer();
-  LocalNumaBuffer(const LocalNumaBuffer &) = delete;
-  auto operator=(const LocalNumaBuffer &) = delete;
-  LocalNumaBuffer(LocalNumaBuffer &&other) noexcept {
+struct NumaBuffer {
+  explicit NumaBuffer(size_t size);
+  NumaBuffer(unsigned int node, size_t size);
+  ~NumaBuffer();
+  NumaBuffer(const NumaBuffer &) = delete;
+  auto operator=(const NumaBuffer &) = delete;
+  NumaBuffer(NumaBuffer &&other) noexcept {
     buffer = std::exchange(other.buffer, {});
   }
-  LocalNumaBuffer &operator=(LocalNumaBuffer &&other) noexcept {
+  NumaBuffer &operator=(NumaBuffer &&other) noexcept {
     if (this != &other)
       buffer = std::exchange(other.buffer, {});
     return *this;
@@ -31,7 +32,8 @@ struct LocalNumaBuffer {
 
 void drop_caches();
 
-LocalNumaBuffer make_local_read_buffer();
+NumaBuffer make_read_buffer(unsigned int node);
+NumaBuffer make_local_read_buffer();
 
 void read_file(char *buf, size_t buf_size);
 
@@ -95,7 +97,7 @@ inline void benchmark_reads_simple(const std::string &output_file) {
     else
       setaffinity_node(node);
 
-    auto read_buffer = make_local_read_buffer();
+    auto read_buffer = make_read_buffer(config.init_core);
 
     std::vector<long> times(config.num_iterations);
     for (int i = 0; i < config.num_iterations; ++i) {
