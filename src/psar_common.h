@@ -50,7 +50,7 @@ struct BenchmarkResult {
 struct BenchmarkReadsSimpleConfig {
   bool set_affinity_any = false;
   int init_core = 0;
-  int num_iterations = 300;
+  int num_iterations = 1000;
 };
 
 template <BenchmarkReadsSimpleConfig config>
