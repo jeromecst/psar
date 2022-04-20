@@ -21,8 +21,7 @@ def json_plot(json_dic, name, warmup):
     plottime(r_time, r_time, name)
 
 
-# for f in ["yeti/test_result.json", "yeti/test2_result.json"]:
-for f in ["yeti/test1.json", "yeti/test2.json"]:
+for f in ["yeti/test_distant_reads_distant_buffer.json", "yeti/test_distant_reads_local_buffer.json", "yeti/test_distant_reads_distant_buffer_forced.json"]:
     path = directory + f
     if os.path.isfile(path):
         json_file = open(path)
