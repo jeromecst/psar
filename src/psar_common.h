@@ -2,7 +2,7 @@
 
 #include <chrono>
 #include <cstdio>
-#include <thread>
+#include <string>
 #include <vector>
 
 namespace psar {
@@ -14,11 +14,11 @@ std::vector<char> make_read_buffer();
 void read_file(char *buf, size_t buf_size);
 
 void setaffinity(unsigned int core);
+void setaffinity_node(unsigned int node);
 void setaffinity_any();
 
-inline unsigned int get_num_cores() {
-  return std::thread::hardware_concurrency();
-}
+unsigned int get_num_cores();
+unsigned int get_num_nodes();
 
 template <typename Fn> long time_us(const Fn &fn) {
   // libstdc++ and libc++ both use clock_gettime(CLOCK_MONOTONIC) on POSIX
