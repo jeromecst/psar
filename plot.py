@@ -8,11 +8,11 @@ def plottime(rtime, cputime, name):
     fig, ax = plt.subplots(2, 1, figsize=(10,10))
     ax[0].boxplot(rtime)
     ax[1].violinplot(rtime)
-    for i, time in enumerate(["real time", "cpu time"]):
-        ax[i].set_title(f"{time} for each numa")
+    for i, method in enumerate(["boxplot", "violinplot"]):
+        ax[i].set_title(f"read real time for each numa node ({method})")
         ax[i].set_xlabel("numa node")
-        ax[i].set_ylabel(f"{time} ($\mu s$)")
-    fig.savefig(name + "_rtime.png")
+        ax[i].set_ylabel("time ($\mu s$)")
+    fig.savefig(name + ".png")
 
 def json_plot(json_dic, name, warmup):
     # 2D array containing time[] for each numa node
@@ -22,10 +22,10 @@ def json_plot(json_dic, name, warmup):
 
 
 # for f in ["yeti/test_result.json", "yeti/test2_result.json"]:
-for f in ["yeti/test1.json"]:
+for f in ["yeti/test1.json", "yeti/test2.json"]:
     path = directory + f
     if os.path.isfile(path):
         json_file = open(path)
         json_string = json.load(json_file)
-        json_plot(json_string["measurements"], "plot/" + str(f), warmup = 100)
+        json_plot(json_string["measurements"], "plot/" + str(f), warmup = 50)
         json_file.close()
