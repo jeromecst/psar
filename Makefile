@@ -4,10 +4,6 @@ LIBS=-isystem benchmark/include -Lbenchmark/build/src -lbenchmark -lpthread
 LOCATION=grenoble
 MACHINE=yeti
 
-upload:
-	ninja -C build
-	scp build/test1 build/test2 $(LOCATION).grid:psar/
-
 fichiertest:
 	# create 50M file
 	dd if=/dev/urandom of=$@ status=progress bs=1024 count=50000
