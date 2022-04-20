@@ -70,8 +70,14 @@ struct BenchmarkResult {
   std::vector<Measurements> measurements;
 };
 
+enum class BufferLocation {
+  OnInitNode,
+  OnLocalNode,
+};
+
 struct BenchmarkReadsSimpleConfig {
   bool set_affinity_any = false;
+  BufferLocation buffer_location = BufferLocation::OnLocalNode;
   int init_core = 0;
   int num_iterations = 1000;
 };
@@ -97,7 +103,14 @@ inline void benchmark_reads_simple(const std::string &output_file) {
     else
       setaffinity_node(node);
 
-    auto read_buffer = make_read_buffer(config.init_core);
+    auto read_buffer = [] {
+      if constexpr (config.buffer_location == BufferLocation::OnLocalNode) {
+        return make_local_read_buffer();
+      } else if constexpr (config.buffer_location ==
+                           BufferLocation::OnInitNode) {
+        return make_read_buffer(config.init_core);
+      }
+    }();
 
     std::vector<long> times(config.num_iterations);
     for (int i = 0; i < config.num_iterations; ++i) {
