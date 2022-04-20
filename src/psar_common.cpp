@@ -8,6 +8,7 @@
 #include <numa.h>
 #include <pthread.h>
 #include <sys/stat.h>
+#include <thread>
 #include <unistd.h>
 #include <utility>
 
@@ -86,12 +87,23 @@ void setaffinity(unsigned int core) {
   pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset);
 }
 
+void setaffinity_node(unsigned int node) {
+  bitmask nodes{};
+  numa_bitmask_clearall(&nodes);
+  numa_bitmask_setbit(&nodes, node);
+  numa_bind(&nodes);
+}
+
 void setaffinity_any() {
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  for (unsigned int i = 0; i < CPU_SETSIZE; ++i)
-    CPU_SET(i, &cpuset);
-  pthread_setaffinity_np(pthread_self(), sizeof(cpuset), &cpuset);
+  numa_bind(numa_all_nodes_ptr);
+}
+
+unsigned int get_num_cores() {
+  return std::thread::hardware_concurrency();
+}
+
+unsigned int get_num_nodes() {
+  return numa_num_configured_nodes();
 }
 
 static unsigned int core_to_node(unsigned int core) {
