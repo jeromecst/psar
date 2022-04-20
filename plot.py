@@ -5,12 +5,14 @@ import matplotlib.pyplot as plt
 directory = 'results/'
 
 def plottime(rtime, cputime, name):
+    numa = len(rtime)
     fig, ax = plt.subplots(2, 1, figsize=(10,10))
-    ax[0].boxplot(rtime)
-    ax[1].violinplot(rtime)
+    ax[0].boxplot(rtime, positions=range(numa))
+    ax[1].violinplot(rtime, positions=range(numa))
     for i, method in enumerate(["boxplot", "violinplot"]):
         ax[i].set_title(f"read real time for each numa node ({method})")
         ax[i].set_xlabel("numa node")
+        ax[i].set_xticks(range(numa))
         ax[i].set_ylabel("time ($\mu s$)")
     fig.savefig(name + ".png")
 
