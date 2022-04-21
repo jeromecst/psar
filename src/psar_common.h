@@ -83,7 +83,7 @@ struct BenchmarkReadsSimpleConfig {
   bool set_affinity_any = false;
   BufferLocation buffer_location = BufferLocation::OnLocalNode;
   int init_core = 0;
-  int num_iterations = 2000;
+  int num_iterations = 10000;
 };
 
 template <BenchmarkReadsSimpleConfig config>
