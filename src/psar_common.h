@@ -32,7 +32,7 @@ struct NumaBuffer {
 
 void drop_caches();
 
-NumaBuffer make_read_buffer(unsigned int node);
+NumaBuffer make_node_bound_read_buffer(unsigned int node);
 NumaBuffer make_local_read_buffer();
 
 void read_file(char *buf, size_t buf_size);
@@ -109,7 +109,7 @@ inline void benchmark_reads_simple(const std::string &output_file) {
         return make_local_read_buffer();
       } else if constexpr (config.buffer_location ==
                            BufferLocation::OnInitNode) {
-        return make_read_buffer(config.init_core);
+        return make_node_bound_read_buffer(config.init_core);
       }
     }();
 

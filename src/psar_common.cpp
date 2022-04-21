@@ -44,7 +44,10 @@ NumaBuffer::NumaBuffer(size_t size) {
   if (size == 0)
     return;
 
-  void *data = numa_alloc_local(size);
+  // using malloc is fine here because glibc's malloc implementation
+  // uses mmap for allocations above 0x20000 bytes -- and new pages are
+  // allocated on the local page by default
+  void *data = std::malloc(std::max<size_t>(size, 0x40000));
   if (data == nullptr)
     throw std::bad_alloc();
 
@@ -79,7 +82,7 @@ NumaBuffer make_local_read_buffer() {
   return buffer;
 }
 
-NumaBuffer make_read_buffer(unsigned int node) {
+NumaBuffer make_node_bound_read_buffer(unsigned int node) {
   struct stat st {};
   if (stat(TestFileName, &st) != 0) {
     perror("stat");
