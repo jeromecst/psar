@@ -52,6 +52,7 @@ NumaBuffer::NumaBuffer(size_t size) {
     throw std::bad_alloc();
 
   buffer = {static_cast<char *>(data), size};
+  deleter = [](NumaBuffer *self) { std::free(self->buffer.data()); };
 }
 
 NumaBuffer::NumaBuffer(unsigned int node, size_t size) {
@@ -63,11 +64,14 @@ NumaBuffer::NumaBuffer(unsigned int node, size_t size) {
     throw std::bad_alloc();
 
   buffer = {static_cast<char *>(data), size};
+  deleter = [](NumaBuffer *self) {
+    numa_free(self->buffer.data(), self->buffer.size());
+  };
 }
 
 NumaBuffer::~NumaBuffer() {
   if (buffer.data() != nullptr)
-    numa_free(buffer.data(), buffer.size());
+    deleter(this);
 }
 
 NumaBuffer make_local_read_buffer() {
