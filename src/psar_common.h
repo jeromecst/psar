@@ -17,10 +17,13 @@ struct NumaBuffer {
   auto operator=(const NumaBuffer &) = delete;
   NumaBuffer(NumaBuffer &&other) noexcept {
     buffer = std::exchange(other.buffer, {});
+    deleter = other.deleter;
   }
   NumaBuffer &operator=(NumaBuffer &&other) noexcept {
-    if (this != &other)
+    if (this != &other) {
       buffer = std::exchange(other.buffer, {});
+      deleter = other.deleter;
+    }
     return *this;
   }
 
@@ -28,6 +31,7 @@ struct NumaBuffer {
   auto size() const { return buffer.size(); }
 
   std::span<char> buffer;
+  void (*deleter)(NumaBuffer *buffer){};
 };
 
 void drop_caches();
