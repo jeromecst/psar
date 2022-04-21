@@ -132,7 +132,7 @@ void setaffinity(unsigned int core) {
 void setaffinity_node(unsigned int node) {
   bitmask *bmp = numa_allocate_nodemask();
   numa_bitmask_setbit(bmp, node);
-  numa_bind(bmp);
+  numa_run_on_node_mask(bmp);
   numa_free_nodemask(bmp);
 }
 
