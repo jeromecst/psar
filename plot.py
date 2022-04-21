@@ -12,6 +12,7 @@ results_dir = Path('results/')
 def plottime(rtime, cputime, data, out_path: Path):
     numa = len(rtime)
     fig, ax = plt.subplots(2, 1, figsize=(10,10))
+    fig.suptitle(f"{out_path.stem} @ {out_path.parent.stem}")
     # ax[0].boxplot(rtime, positions=range(numa))
     ax[0].violinplot(rtime, positions=range(numa))
     # ax[0] = sns.boxplot(x="read_node", y="times_us", hue="nodes", data=data)
