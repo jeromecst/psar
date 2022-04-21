@@ -46,7 +46,7 @@ NumaBuffer::NumaBuffer(size_t size) {
 
   // using malloc is fine here because glibc's malloc implementation
   // uses mmap for allocations above 0x20000 bytes -- and new pages are
-  // allocated on the local page by default
+  // allocated on the local node by default
   void *data = std::malloc(std::max<size_t>(size, 0x40000));
   if (data == nullptr)
     throw std::bad_alloc();
