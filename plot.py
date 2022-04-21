@@ -1,3 +1,5 @@
+import random
+
 import colorama
 import json
 from pathlib import Path
@@ -8,6 +10,7 @@ import numpy as np
 import seaborn as sns
 
 results_dir = Path('results/')
+points_to_plot = 1800
 
 def plottime(rtime, cputime, data, out_path: Path):
     numa = len(rtime)
@@ -29,10 +32,17 @@ def plottime(rtime, cputime, data, out_path: Path):
 def json_plot(json_dic, name, warmup):
     # 2D array containing time[] for each numa node
     # len(time) should be equal to number of numa node
+    for numa_dic in json_dic:
+        # these data points are not relevant (warmup)
+        numa_dic["nodes"] = numa_dic["nodes"][warmup:]
+        numa_dic["times_us"] = numa_dic["times_us"][warmup:]
+        # we have decided to only keep this amount of data points
+        nodes_sub, times_us_sub = zip(*random.sample(list(zip(numa_dic["nodes"], numa_dic["times_us"])), points_to_plot))
+        numa_dic["nodes"] = list(nodes_sub)
+        numa_dic["times_us"] = list(times_us_sub)
     df = pandas.DataFrame(json_dic)
-    # df["times_us"] = df["times_us"].str.split('[ :]')
     df = df.explode(['times_us', 'nodes'], ignore_index=True)
-    r_time = [i["times_us"][warmup:] for i in json_dic]
+    r_time = [i["times_us"] for i in json_dic]
     plottime(r_time, r_time, df, name)
 
 
