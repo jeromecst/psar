@@ -178,7 +178,7 @@ inline void benchmark_reads_get_times(const std::string &output_file) {
 						setaffinity_node(pagecache_node);
 						return make_node_bound_read_buffer(config.distant_node);
 					}
-					exit();
+					exit(1);
 				}();
 				read_file(read_buffer.data(), read_buffer.size());
 			}
@@ -192,7 +192,7 @@ inline void benchmark_reads_get_times(const std::string &output_file) {
 					} else if (BuffLocation == Location::OnDistantNode) {
 						return make_node_bound_read_buffer(config.distant_node);
 					}
-					exit();
+					exit(1);
 				}();
 
 				if constexpr (config.set_affinity_any)
