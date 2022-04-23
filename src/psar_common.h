@@ -115,8 +115,7 @@ inline void benchmark_reads_simple(const std::string &output_file) {
 				return make_local_read_buffer();
 			} else if constexpr (config.buffer_location ==
 			                     BufferLocation::OnInitNode) {
-				return make_node_bound_read_buffer(
-				    config.init_core);
+				return make_node_bound_read_buffer(config.init_core);
 			}
 		}();
 
@@ -126,16 +125,14 @@ inline void benchmark_reads_simple(const std::string &output_file) {
 		std::vector<long> times(config.num_iterations);
 		std::vector<unsigned int> nodes(config.num_iterations);
 		for (int i = 0; i < config.num_iterations; ++i) {
-			times[i] = time_us([&] {
-				read_file(read_buffer.data(),
-				          read_buffer.size());
-			});
+			times[i] = time_us(
+			    [&] { read_file(read_buffer.data(), read_buffer.size()); });
 			nodes[i] = get_current_node();
 		}
 
 		std::cout << config.init_core << '/' << node << '\n';
-		result.add_measurements(config.init_core, node,
-		                        std::move(times), std::move(nodes));
+		result.add_measurements(config.init_core, node, std::move(times),
+		                        std::move(nodes));
 	}
 
 	result.save(output_file);

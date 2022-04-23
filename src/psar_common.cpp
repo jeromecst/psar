@@ -21,8 +21,7 @@ namespace {
 struct NumaAvailableChecker {
 	NumaAvailableChecker() {
 		if (numa_available() == -1)
-			throw std::runtime_error(
-			    "numa_available() returned -1");
+			throw std::runtime_error("numa_available() returned -1");
 	}
 };
 
