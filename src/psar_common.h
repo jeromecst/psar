@@ -55,7 +55,7 @@ template <typename Fn> long time_us(const Fn &fn) {
 	fn();
 	auto elapsed = std::chrono::steady_clock::now() - start;
 	return std::chrono::duration_cast<std::chrono::microseconds>(elapsed)
-		.count();
+	    .count();
 }
 
 struct BenchmarkResult {
@@ -71,8 +71,8 @@ struct BenchmarkResult {
 	};
 
 	void add_measurements(unsigned int init_core, unsigned int read_core,
-						  std::vector<long> times,
-						  std::vector<unsigned int> nodes);
+	                      std::vector<long> times,
+	                      std::vector<unsigned int> nodes);
 
 	void save(const std::string &output_file);
 
@@ -111,10 +111,10 @@ inline void benchmark_reads_simple(const std::string &output_file) {
 
 		auto read_buffer = [] {
 			if constexpr (config.buffer_location ==
-						  BufferLocation::OnLocalNode) {
+			              BufferLocation::OnLocalNode) {
 				return make_local_read_buffer();
 			} else if constexpr (config.buffer_location ==
-								 BufferLocation::OnInitNode) {
+			                     BufferLocation::OnInitNode) {
 				return make_node_bound_read_buffer(config.init_core);
 			}
 		}();
@@ -132,7 +132,7 @@ inline void benchmark_reads_simple(const std::string &output_file) {
 
 		std::cout << config.init_core << '/' << node << '\n';
 		result.add_measurements(config.init_core, node, std::move(times),
-								std::move(nodes));
+		                        std::move(nodes));
 	}
 
 	result.save(output_file);
