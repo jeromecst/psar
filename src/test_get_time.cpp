@@ -2,9 +2,11 @@
 
 int main() {
 	constexpr psar::BenchmarkReadsSimpleConfig config{
-		.set_affinity_any = true,
+		.set_affinity_any = false,
 		.buffer_location = psar::Location::OnLocalNode,
+		.local_node = 1,
+		.distant_node = 2,
 	};
-	psar::benchmark_reads_simple<config>(
-		"results/test_distant_reads_local_buffer.json");
+	psar::benchmark_reads_get_times<config>(
+		"results/test_get_time.json");
 }
