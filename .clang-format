@@ -3,3 +3,5 @@ BasedOnStyle: LLVM
 Language: Cpp
 Standard: c++20
 AllowShortFunctionsOnASingleLine: InlineOnly
+IndentWidth: 8
+UseTab: ForIndentation
