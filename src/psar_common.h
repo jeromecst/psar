@@ -5,6 +5,7 @@
 #include <iostream>
 #include <span>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace psar {
@@ -106,7 +107,7 @@ inline void benchmark_reads_simple(const std::string &output_file) {
 		read_file(read_buffer.data(), read_buffer.size());
 	}
 
-	for (unsigned int node = 0; node < num_nodes; ++node) {
+	const auto benchmark_node = [&](unsigned int node) {
 		setaffinity_node(node);
 
 		auto read_buffer = [] {
@@ -133,6 +134,15 @@ inline void benchmark_reads_simple(const std::string &output_file) {
 		std::cout << config.init_core << '/' << node << '\n';
 		result.add_measurements(config.init_core, node, std::move(times),
 		                        std::move(nodes));
+	};
+
+	for (unsigned int node = 0; node < num_nodes; ++node) {
+		// start a new thread to ensure the internal NUMA balancing stats
+		// are reset (as init_numa_balancing is called from sched_fork)
+		std::thread thread(benchmark_node, node);
+
+		// wait for the benchmark to complete before moving on to the next node
+		thread.join();
 	}
 
 	result.save(output_file);
