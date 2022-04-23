@@ -19,14 +19,14 @@ def plottime(data, out_path: Path):
     numa = max(data["read_node"]) + 1
     xaxis = range(numa)
     fig.suptitle(f"{out_path.stem} @ {out_path.parent.stem}", fontsize=fontsize+2)
-    ax = sns.swarmplot(x="read_node", y="times_ms", hue="nodes", data=data, size=3)
+    ax = sns.swarmplot(x="read_node", y="times_per_byte", hue="nodes", data=data, size=3)
     # ax = sns.violinplot(x="read_node", y=data["times_ms"].astype(int), data=data, ax=ax)
     method = "swarmplot"
-    ax.set_title(f"read real time for each numa node ({method})")
+    ax.set_title(f"real time to read 1 byte for each numa node ({method})")
     ax.set_xlabel("numa node")
     ax.set_xticks(xaxis)
-    ax.set_yticks(np.arange(0, max(data["times_ms"]), 2))
-    ax.set_ylabel("time ($ms$)")
+    ax.set_yticks(np.linspace(0, max(data["times_per_byte"]), 20))
+    ax.set_ylabel("time (s)")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(str(out_path) + ".png")
 
@@ -43,6 +43,7 @@ def json_plot(json_dic, name, warmup):
     df = pandas.DataFrame(json_dic)
     df = df.explode(['times_us', 'nodes'], ignore_index=True)
     df["times_ms"] = df["times_us"] / 1E3
+    df["times_per_byte"] = df["times_ms"] * 1E-3 / 50E6 # 50 Mb file
     plottime(df, name)
 
 
