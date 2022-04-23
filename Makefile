@@ -8,13 +8,10 @@ fichiertest:
 	# create 50M file
 	dd if=/dev/urandom of=$@ status=progress bs=1024 count=50000
 
-exec_test1:
-	sudo-g5k ./build/test1
-
-exec_test2:
-	sudo-g5k ./build/test2
-
-exec_all: exec_test1 exec_test2
+exec:
+	sudo-g5k ./build/test_distant_reads_distant_buffer_forced
+	sudo-g5k ./build/test_distant_reads_distant_buffer
+	sudo-g5k ./build/test_distant_reads_local_buffer
 
 plotres:
 	python plot.py
