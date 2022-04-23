@@ -34,3 +34,6 @@ target_link_libraries(test_distant_reads_distant_buffer PRIVATE psar_common)
 
 add_executable(test_distant_reads_local_buffer src/test_distant_reads_local_buffer.cpp)
 target_link_libraries(test_distant_reads_local_buffer PRIVATE psar_common)
+
+add_executable(test_get_time src/test_get_time.cpp)
+target_link_libraries(test_get_time PRIVATE psar_common)
