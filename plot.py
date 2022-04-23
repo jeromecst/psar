@@ -60,7 +60,7 @@ def json_plot(json_dic, name, warmup):
     xticks = range(max(df["read_node"]) + 1)
     xaxisname = "init node sched"
     df[xaxisname] = df["read_node"]
-    makefig(df, name, "init node sched", xticks=xticks, hue="nodes")
+    makefig(df, name, xaxisname, xticks=xticks, hue="nodes")
 
 def json_plot_gettime(json_dic, name, warmup):
     set_layout(json_dic)
