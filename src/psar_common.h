@@ -115,8 +115,7 @@ inline void benchmark_reads_simple(const std::string &output_file) {
 		setaffinity_node(node);
 
 		auto read_buffer = [] {
-			if constexpr (config.buffer_location ==
-			              Location::OnLocalNode) {
+			if constexpr (config.buffer_location == Location::OnLocalNode) {
 				return make_local_read_buffer();
 			} else if constexpr (config.buffer_location ==
 			                     Location::OnInitNode) {
@@ -156,9 +155,9 @@ template <BenchmarkReadsSimpleConfig config>
 inline void benchmark_reads_get_times(const std::string &output_file) {
 	const auto num_nodes = get_num_nodes();
 	const Location listlocationpc[] = {Location::OnLocalNode,
-	                             Location::OnDistantNode};
+	                                   Location::OnDistantNode};
 	const Location listlocationbuff[] = {Location::OnLocalNode,
-	                               Location::OnDistantNode};
+	                                     Location::OnDistantNode};
 	int pagecache_node;
 
 	BenchmarkResult result;
