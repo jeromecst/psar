@@ -2,9 +2,9 @@
 
 int main() {
 	constexpr psar::BenchmarkReadsSimpleConfig config{
-	    .set_affinity_any = true,
-	    .buffer_location = psar::BufferLocation::OnLocalNode,
+		.set_affinity_any = true,
+		.buffer_location = psar::BufferLocation::OnLocalNode,
 	};
 	psar::benchmark_reads_simple<config>(
-	    "results/test_distant_reads_local_buffer.json");
+		"results/test_distant_reads_local_buffer.json");
 }

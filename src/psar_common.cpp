@@ -165,24 +165,24 @@ unsigned int get_current_node() {
 }
 
 void BenchmarkResult::add_measurements(unsigned int init_core,
-                                       unsigned int read_core,
-                                       std::vector<long> times,
-                                       std::vector<unsigned int> nodes) {
+									   unsigned int read_core,
+									   std::vector<long> times,
+									   std::vector<unsigned int> nodes) {
 	measurements.push_back(Measurements{
-	    .init_core = init_core,
-	    .init_node = core_to_node(init_core),
-	    .read_core = read_core,
-	    .read_node = core_to_node(read_core),
-	    .times_us = std::move(times),
-	    .nodes = std::move(nodes),
+		.init_core = init_core,
+		.init_node = core_to_node(init_core),
+		.read_core = read_core,
+		.read_node = core_to_node(read_core),
+		.times_us = std::move(times),
+		.nodes = std::move(nodes),
 	});
 }
 
 using json = nlohmann::json;
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(BenchmarkResult::Measurements, read_core,
-                                   read_node, init_core, init_node, times_us,
-                                   nodes)
+								   read_node, init_core, init_node, times_us,
+								   nodes)
 
 void BenchmarkResult::save(const std::string &output_file) {
 	json root;

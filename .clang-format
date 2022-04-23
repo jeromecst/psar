@@ -5,4 +5,4 @@ Standard: c++20
 AllowShortFunctionsOnASingleLine: InlineOnly
 IndentWidth: 4
 TabWidth: 4
-UseTab: ForIndentation
+UseTab: Always
