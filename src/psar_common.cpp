@@ -184,8 +184,15 @@ NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(BenchmarkResult::Measurements, read_core,
                                    read_node, init_core, init_node, times_us,
                                    nodes)
 
+static std::string get_hostname() {
+	char hostname[HOST_NAME_MAX + 1]{};
+	gethostname(hostname, HOST_NAME_MAX);
+	return hostname;
+}
+
 void BenchmarkResult::save(const std::string &output_file) {
 	json root;
+	root["hostname"] = get_hostname();
 	root["measurements"] = measurements;
 	std::ofstream o{output_file};
 	o << root;
