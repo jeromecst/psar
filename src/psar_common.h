@@ -72,7 +72,7 @@ struct BenchmarkReadsConfig {
 	int pagecache_core = 0;
 	int read_core = 0;
 	int buffer_core = 0;
-	int num_iterations = 1000;
+	int num_iterations = 5000;
 };
 
 struct BenchmarkResult {
@@ -105,7 +105,7 @@ struct BenchmarkReadsSimpleConfig {
 	bool allow_migrations_during_reads = true;
 	Location buffer_location = Location::OnReadCore;
 	int pagecache_core = 0;
-	int num_iterations = 1000;
+	int num_iterations = 5000;
 };
 
 void benchmark_reads_simple(const BenchmarkReadsSimpleConfig &config,
@@ -115,7 +115,7 @@ struct BenchmarkGetTimesConfig {
 	bool allow_migrations_during_reads = false;
 	int node_a = 1;
 	int node_b = 2;
-	int num_iterations = 1000;
+	int num_iterations = 5000;
 };
 
 void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
@@ -124,6 +124,11 @@ void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
 void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
                                const std::string &output_file);
 
-void benchmark_reads_get_times_all_scenarios(const std::string &output_file);
+struct BenchmarkGetTimesAllConfig {
+	int num_iterations = 5000;
+};
+
+void benchmark_reads_get_times_all_scenarios(
+	const BenchmarkGetTimesAllConfig &config, const std::string &output_file);
 
 } // namespace psar

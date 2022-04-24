@@ -312,7 +312,8 @@ void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
 	result.save(output_file);
 }
 
-void benchmark_reads_get_times_all_scenarios(const std::string &output_file) {
+void benchmark_reads_get_times_all_scenarios(
+	const BenchmarkGetTimesAllConfig &config, const std::string &output_file) {
 	const auto num_nodes = int(get_num_nodes());
 
 	BenchmarkResult result;
@@ -321,6 +322,7 @@ void benchmark_reads_get_times_all_scenarios(const std::string &output_file) {
 	BenchmarkReadsConfig config_{
 		.allow_migrations_during_reads = true,
 		.bind_read_buffer = false,
+		.num_iterations = config.num_iterations,
 	};
 
 	for (int pagecache = 0; pagecache < num_nodes; ++pagecache) {
