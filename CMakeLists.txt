@@ -40,3 +40,6 @@ target_link_libraries(test_get_time PRIVATE psar_common)
 
 add_executable(test_get_time_all src/test_get_time_all_scenarios.cpp)
 target_link_libraries(test_get_time_all PRIVATE psar_common)
+
+add_executable(test_get_time_all_forced src/test_get_time_all_scenarios_forced.cpp)
+target_link_libraries(test_get_time_all_forced PRIVATE psar_common)
