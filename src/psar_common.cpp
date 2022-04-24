@@ -322,7 +322,7 @@ void benchmark_reads_get_times_all_scenarios(
 	result.measurements.reserve(num_nodes * num_nodes * num_nodes);
 
 	BenchmarkReadsConfig config_{
-		.allow_migrations_during_reads = true,
+		.allow_migrations_during_reads = config.allow_migrations_during_reads,
 		.bind_read_buffer = false,
 		.num_iterations = config.num_iterations,
 	};
