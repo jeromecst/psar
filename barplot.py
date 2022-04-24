@@ -27,19 +27,18 @@ def format_dic(dic, layout_times):
         for i in exp["times_us"]:
             list_layout += [what_layout(layout_times, i)]
         for l in layout:
-            exp[l] = np.count_nonzero([x == l for x in list_layout])
+            exp[l] = np.count_nonzero([x == l for x in list_layout]) / len(exp["times_us"])
         # delete useless fields
         for field in ["times_us","nodes","buffer_core","init_core","read_core"]:
             exp.pop(field, None)
 
 def plot_bar(df, _from, _to, ax):
     x = range(_to - _from)
-    colors = ['#1D2F6F', '#8390FA', '#6EAF46', '#FAC748']
+    colors = ['#33cc33', '#3366ff', '#006699', '#DB4444']
     bottom_sum = np.zeros(_to - _from)
     for i, tag in enumerate(layout):
-        ax.bar(x, df[tag][_from:_to], bottom=bottom_sum)
+        ax.bar(x, df[tag][_from:_to], bottom=bottom_sum, color=colors[i])
         bottom_sum += df[tag][_from:_to]
-
 
 
 def json_plot_gettime_all(json_dic, name, warmup):
@@ -49,14 +48,19 @@ def json_plot_gettime_all(json_dic, name, warmup):
     print(layout_times)
     df = pandas.DataFrame(json_dic)
     pandas.set_option("display.max_rows", 65, "display.max_columns", None)
-    print(df)
     
-    fig, ax = plt.subplots(4, 1, figsize=(12, 20))
+    fig, ax = plt.subplots(4, 1, figsize=(14, 20))
 
-    for i in range(4):
-        plot_bar(df, i*16, (i+1)*16, ax[i])
+    xlabels = [ f"({i}, {j})" for i in range(4) for j in range(4)]
+    print(xlabels)
+    xticks = np.arange(16) 
+    for i, axx in enumerate(np.array(ax).flat):
+        plot_bar(df, i*16, (i+1)*16, axx)
+        axx.set_title(f"data on node {i}")
+        axx.set_xticks(xticks, xlabels)
+        axx.legend(layout)
 
-    fig.savefig(name + ".png")
+    fig.savefig("plot/yeti/" + name + ".png")
 
 warmup = 20
 points_to_plot = 250
