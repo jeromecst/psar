@@ -89,12 +89,7 @@ enum class Location {
 struct BenchmarkReadsSimpleConfig {
 	bool set_affinity_any = false;
 	Location buffer_location = Location::OnLocalNode;
-	Location pagecache_location = Location::OnLocalNode;
 	int init_core = 0;
-	// node used for scheduling in test_reads_get_time
-	int local_node = 1;
-	// should be != local_node
-	int distant_node = 2;
 	int num_iterations = 1000;
 };
 
@@ -153,7 +148,16 @@ inline void benchmark_reads_simple(const std::string &output_file) {
 	result.save(output_file);
 }
 
-template <BenchmarkReadsSimpleConfig config>
+struct BenchmarkGetTimesConfig {
+	int init_core = 0;
+	// node used for scheduling in test_reads_get_time
+	int local_node = 1;
+	// should be != local_node
+	int distant_node = 2;
+	int num_iterations = 1000;
+};
+
+template <BenchmarkGetTimesConfig config>
 inline void benchmark_reads_get_times(const std::string &output_file) {
 	const auto num_nodes = get_num_nodes();
 	const Location listlocationpc[] = {Location::OnLocalNode,
@@ -201,9 +205,6 @@ inline void benchmark_reads_get_times(const std::string &output_file) {
 					}
 					exit(1);
 				}();
-
-				if constexpr (config.set_affinity_any)
-					setaffinity_any();
 
 				std::vector<long> times(config.num_iterations);
 				std::vector<unsigned int> nodes(config.num_iterations);
