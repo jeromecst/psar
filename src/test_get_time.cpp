@@ -2,8 +2,8 @@
 
 int main() {
 	constexpr psar::BenchmarkGetTimesConfig config{
-		.local_node = 1,
-		.distant_node = 2,
+		.node_a = 1,
+		.node_b = 2,
 	};
-	psar::benchmark_reads_get_times<config>("results/test_get_time.json");
+	psar::benchmark_reads_get_times(config, "results/test_get_time.json");
 }

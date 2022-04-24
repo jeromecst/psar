@@ -81,158 +81,45 @@ struct BenchmarkResult {
 };
 
 enum class Location {
-	OnInitNode,
-	OnDistantNode,
-	OnLocalNode,
+	OnPageCacheCore,
+	OnReadCore,
 };
+
+struct BenchmarkReadsConfig {
+	bool allow_migrations_during_reads = true;
+	/// whether the read buffer should be bound to buffer_core
+	/// (if true, the buffer will never be migrated automatically)
+	bool bind_read_buffer = false;
+	int pagecache_core = 0;
+	int read_core = 0;
+	int buffer_core = 0;
+	int num_iterations = 1000;
+};
+
+void benchmark_reads(const BenchmarkReadsConfig &config,
+                     BenchmarkResult &result);
 
 struct BenchmarkReadsSimpleConfig {
-	bool set_affinity_any = false;
-	Location buffer_location = Location::OnLocalNode;
-	int init_core = 0;
+	bool allow_migrations_during_reads = true;
+	Location buffer_location = Location::OnReadCore;
+	int pagecache_core = 0;
 	int num_iterations = 1000;
 };
 
-template <BenchmarkReadsSimpleConfig config>
-inline void benchmark_reads_simple(const std::string &output_file) {
-	const auto num_nodes = get_num_nodes();
-
-	BenchmarkResult result;
-	result.measurements.reserve(num_nodes);
-
-	// fill the page cache on core InitCore -- one read is enough
-	drop_caches();
-	{
-		setaffinity_node(config.init_core);
-		auto read_buffer = make_local_read_buffer();
-		read_file(read_buffer.data(), read_buffer.size());
-	}
-
-	const auto benchmark_node = [&](unsigned int node) {
-		setaffinity_node(node);
-
-		auto read_buffer = [] {
-			if constexpr (config.buffer_location == Location::OnLocalNode) {
-				return make_local_read_buffer();
-			} else if constexpr (config.buffer_location ==
-			                     Location::OnInitNode) {
-				return make_node_bound_read_buffer(config.init_core);
-			}
-		}();
-
-		if constexpr (config.set_affinity_any)
-			setaffinity_any();
-
-		std::vector<long> times(config.num_iterations);
-		std::vector<unsigned int> nodes(config.num_iterations);
-		for (int i = 0; i < config.num_iterations; ++i) {
-			times[i] = time_us(
-				[&] { read_file(read_buffer.data(), read_buffer.size()); });
-			nodes[i] = get_current_node();
-		}
-
-		std::cout << config.init_core << '/' << node << '\n';
-		result.add_measurements(config.init_core, node, std::move(times),
-		                        std::move(nodes));
-	};
-
-	for (unsigned int node = 0; node < num_nodes; ++node) {
-		// start a new thread to ensure the internal NUMA balancing stats
-		// are reset (as init_numa_balancing is called from sched_fork)
-		std::thread thread(benchmark_node, node);
-
-		// wait for the benchmark to complete before moving on to the next node
-		thread.join();
-	}
-
-	result.save(output_file);
-}
+void benchmark_reads_simple(const BenchmarkReadsSimpleConfig &config,
+                            const std::string &output_file);
 
 struct BenchmarkGetTimesConfig {
-	int init_core = 0;
-	// node used for scheduling in test_reads_get_time
-	int local_node = 1;
-	// should be != local_node
-	int distant_node = 2;
+	bool allow_migrations_during_reads = false;
+	int node_a = 1;
+	int node_b = 2;
 	int num_iterations = 1000;
 };
 
-template <BenchmarkGetTimesConfig config>
-inline void benchmark_reads_get_times(const std::string &output_file) {
-	const auto num_nodes = get_num_nodes();
-	const Location listlocationpc[] = {Location::OnLocalNode,
-	                                   Location::OnDistantNode};
-	const Location listlocationbuff[] = {Location::OnLocalNode,
-	                                     Location::OnDistantNode};
-	int pagecache_node;
+void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
+                               BenchmarkResult &result);
 
-	BenchmarkResult result;
-	result.measurements.reserve(num_nodes);
-
-	// the local and distant node are fixed in config
-	// we only vary the buffer and pagecache location
-	for (auto PCLocation : listlocationpc) {
-		for (auto BuffLocation : listlocationbuff) {
-			// fill the page cache -- one read is enough
-			// fill it on the PCLocation (can be on local or distant node)
-			drop_caches();
-			{
-				auto read_buffer = [&] {
-					if (PCLocation == Location::OnLocalNode) {
-						pagecache_node = config.local_node;
-						setaffinity_node(pagecache_node);
-						return make_local_read_buffer();
-					} else if (PCLocation == Location::OnDistantNode) {
-						pagecache_node = config.distant_node;
-						setaffinity_node(pagecache_node);
-						return make_node_bound_read_buffer(config.distant_node);
-					}
-					exit(1);
-				}();
-				read_file(read_buffer.data(), read_buffer.size());
-			}
-
-			const auto benchmark_node = [&](unsigned int node) {
-				setaffinity_node(node);
-
-				// allocate a new buffer on BuffLocation
-				// can be on local or distant node
-				auto read_buffer = [&] {
-					if (BuffLocation == Location::OnLocalNode) {
-						return make_local_read_buffer();
-					} else if (BuffLocation == Location::OnDistantNode) {
-						return make_node_bound_read_buffer(config.distant_node);
-					}
-					exit(1);
-				}();
-
-				std::vector<long> times(config.num_iterations);
-				std::vector<unsigned int> nodes(config.num_iterations);
-				for (int i = 0; i < config.num_iterations; ++i) {
-					times[i] = time_us([&] {
-						read_file(read_buffer.data(), read_buffer.size());
-					});
-					nodes[i] = get_current_node();
-				}
-
-				std::cout << pagecache_node << '/' << node << '\n';
-				result.add_measurements(pagecache_node, node, std::move(times),
-				                        std::move(nodes));
-			};
-
-			// start a new thread to ensure the internal NUMA balancing
-			// stats are reset (as init_numa_balancing is called from
-			// sched_fork)
-			// always schedule on local node
-			std::thread thread(benchmark_node, config.local_node);
-
-			// wait for the benchmark to complete before moving on to the
-			// next node
-			thread.join();
-		}
-
-		result.save(output_file);
-	}
-}
+void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
+                               const std::string &output_file);
 
 } // namespace psar
