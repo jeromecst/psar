@@ -1,5 +1,8 @@
-#define _DEFAULT_SOURCE
 #include "psar_common.h"
+
+#define _DEFAULT_SOURCE
+#include <climits>
+
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
