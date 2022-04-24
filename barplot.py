@@ -59,7 +59,7 @@ def json_plot_gettime_all(json_dic, name, warmup):
         plot_bar(df, i*16, (i+1)*16, axx)
         axx.set_title(f"data on node {i}")
         axx.set_xticks(xticks, xlabels)
-        axx.set_xlabel("(node )")
+        axx.set_xlabel("(node buffer, node read)")
         axx.legend(layout)
 
     fig.savefig("plot/yeti/" + name + ".png")
