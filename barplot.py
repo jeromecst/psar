@@ -21,9 +21,10 @@ def what_layout(layout_times, value):
     idx = (np.abs(layout_times - value)).argmin()
     return layout[idx]
 
-def format_dic(dic, layout_times):
+def format_dic(dic, layout_times, warmup):
     for exp in dic:
         list_layout = []
+        exp["times_us"] = exp["times_us"][warmup:]
         for i in exp["times_us"]:
             list_layout += [what_layout(layout_times, i)]
         for l in layout:
@@ -43,7 +44,7 @@ def plot_bar(df, _from, _to, ax):
 
 def json_plot_gettime_all(json_dic, name, warmup):
     layout_times = get_layout_times()
-    format_dic(json_dic, layout_times)
+    format_dic(json_dic, layout_times, warmup)
 
     print(layout_times)
     df = pandas.DataFrame(json_dic)
@@ -52,7 +53,6 @@ def json_plot_gettime_all(json_dic, name, warmup):
     fig, ax = plt.subplots(4, 1, figsize=(14, 20))
 
     xlabels = [ f"({i}, {j})" for i in range(4) for j in range(4)]
-    print(xlabels)
     xticks = np.arange(16) 
     for i, axx in enumerate(np.array(ax).flat):
         plot_bar(df, i*16, (i+1)*16, axx)
