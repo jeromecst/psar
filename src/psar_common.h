@@ -65,7 +65,7 @@ struct BenchmarkResult {
 		unsigned int init_node;
 		unsigned int read_core;
 		unsigned int read_node;
-		/// times in us
+		/// times in μs
 		std::vector<long> times_us;
 		/// the active node at the end of each sample
 		std::vector<unsigned int> nodes;
@@ -91,8 +91,10 @@ struct BenchmarkReadsSimpleConfig {
 	Location buffer_location = Location::OnLocalNode;
 	Location pagecache_location = Location::OnLocalNode;
 	int init_core = 0;
-	int local_node = 0;
-	int distant_node = 0;
+	// node used for scheduling in test_reads_get_time
+	int local_node = 1;
+	// should be != local_node
+	int distant_node = 2;
 	int num_iterations = 1000;
 };
 
@@ -163,9 +165,12 @@ inline void benchmark_reads_get_times(const std::string &output_file) {
 	BenchmarkResult result;
 	result.measurements.reserve(num_nodes);
 
+	// the local and distant node are fixed in config
+	// we only vary the buffer and pagecache location
 	for (auto PCLocation : listlocationpc) {
 		for (auto BuffLocation : listlocationbuff) {
-			/* fill the page cache -- one read is enough */
+			// fill the page cache -- one read is enough
+			// fill it on the PCLocation (can be on local or distant node)
 			drop_caches();
 			{
 				auto read_buffer = [&] {
@@ -186,6 +191,8 @@ inline void benchmark_reads_get_times(const std::string &output_file) {
 			const auto benchmark_node = [&](unsigned int node) {
 				setaffinity_node(node);
 
+				// allocate a new buffer on BuffLocation
+				// can be on local or distant node
 				auto read_buffer = [&] {
 					if (BuffLocation == Location::OnLocalNode) {
 						return make_local_read_buffer();
