@@ -30,7 +30,7 @@ def makefig(data, out_path: Path, xstr, xticks=None, hue=None):
 
 def sub_sample(dic, warmup):
     size = len(dic[0]["nodes"])
-    iteration = int(size / (points_to_plot))
+    iteration = int(size / (points_to_plot + warmup))
     for numa_dic in dic:
         # these data points are not relevant (warmup)
         numa_dic["nodes"] = numa_dic["nodes"][warmup::iteration]
