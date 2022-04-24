@@ -2,9 +2,9 @@
 
 int main() {
 	constexpr psar::BenchmarkReadsSimpleConfig config{
-		.set_affinity_any = false,
-		.buffer_location = psar::Location::OnInitNode,
+		.allow_migrations_during_reads = false,
+		.buffer_location = psar::Location::OnPageCacheCore,
 	};
-	psar::benchmark_reads_simple<config>(
-		"results/test_distant_reads_distant_buffer_forced.json");
+	psar::benchmark_reads_simple(
+		config, "results/test_distant_reads_distant_buffer_forced.json");
 }
