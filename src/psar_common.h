@@ -59,27 +59,6 @@ template <typename Fn> long time_us(const Fn &fn) {
 	    .count();
 }
 
-struct BenchmarkResult {
-	struct Measurements {
-		unsigned int init_core;
-		unsigned int init_node;
-		unsigned int read_core;
-		unsigned int read_node;
-		/// times in μs
-		std::vector<long> times_us;
-		/// the active node at the end of each sample
-		std::vector<unsigned int> nodes;
-	};
-
-	void add_measurements(unsigned int init_core, unsigned int read_core,
-	                      std::vector<long> times,
-	                      std::vector<unsigned int> nodes);
-
-	void save(const std::string &output_file);
-
-	std::vector<Measurements> measurements;
-};
-
 enum class Location {
 	OnPageCacheCore,
 	OnReadCore,
@@ -94,6 +73,29 @@ struct BenchmarkReadsConfig {
 	int read_core = 0;
 	int buffer_core = 0;
 	int num_iterations = 1000;
+};
+
+struct BenchmarkResult {
+	struct Measurements {
+		unsigned int init_core;
+		unsigned int init_node;
+		unsigned int read_core;
+		unsigned int read_node;
+		unsigned int buffer_core;
+		unsigned int buffer_node;
+		/// times in μs
+		std::vector<long> times_us;
+		/// the active node at the end of each sample
+		std::vector<unsigned int> nodes;
+	};
+
+	void add_measurements(const BenchmarkReadsConfig &config,
+	                      std::vector<long> times,
+	                      std::vector<unsigned int> nodes);
+
+	void save(const std::string &output_file);
+
+	std::vector<Measurements> measurements;
 };
 
 void benchmark_reads(const BenchmarkReadsConfig &config,
@@ -121,5 +123,7 @@ void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
 
 void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
                                const std::string &output_file);
+
+void benchmark_reads_get_times_all_scenarios(const std::string &output_file);
 
 } // namespace psar

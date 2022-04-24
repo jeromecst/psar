@@ -164,15 +164,16 @@ unsigned int get_current_node() {
 	return core_to_node(sched_getcpu());
 }
 
-void BenchmarkResult::add_measurements(unsigned int init_core,
-                                       unsigned int read_core,
+void BenchmarkResult::add_measurements(const BenchmarkReadsConfig &config,
                                        std::vector<long> times,
                                        std::vector<unsigned int> nodes) {
 	measurements.push_back(Measurements{
-		.init_core = init_core,
-		.init_node = core_to_node(init_core),
-		.read_core = read_core,
-		.read_node = core_to_node(read_core),
+		.init_core = static_cast<unsigned int>(config.pagecache_core),
+		.init_node = core_to_node(config.pagecache_core),
+		.read_core = static_cast<unsigned int>(config.read_core),
+		.read_node = core_to_node(config.read_core),
+		.buffer_core = static_cast<unsigned int>(config.buffer_core),
+		.buffer_node = core_to_node(config.buffer_core),
 		.times_us = std::move(times),
 		.nodes = std::move(nodes),
 	});
@@ -181,8 +182,8 @@ void BenchmarkResult::add_measurements(unsigned int init_core,
 using json = nlohmann::json;
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(BenchmarkResult::Measurements, read_core,
-                                   read_node, init_core, init_node, times_us,
-                                   nodes)
+                                   read_node, init_core, init_node, buffer_core,
+                                   buffer_node, times_us, nodes)
 
 static std::string get_hostname() {
 	char hostname[HOST_NAME_MAX + 1]{};
@@ -230,8 +231,7 @@ void benchmark_reads(const BenchmarkReadsConfig &config,
 		std::cout << " read_core=" << config.read_core
 				  << " buffer_core=" << config.buffer_core
 				  << " pagecache_core=" << config.pagecache_core << '\n';
-		result.add_measurements(config.pagecache_core, config.read_core,
-		                        std::move(times), std::move(nodes));
+		result.add_measurements(config, std::move(times), std::move(nodes));
 	};
 
 	// start a new thread to ensure the internal NUMA balancing stats
@@ -306,6 +306,31 @@ void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
 	BenchmarkResult result;
 	result.measurements.reserve(4);
 	benchmark_reads_get_times(config, result);
+	result.save(output_file);
+}
+
+void benchmark_reads_get_times_all_scenarios(const std::string &output_file) {
+	const auto num_nodes = int(get_num_nodes());
+
+	BenchmarkResult result;
+	result.measurements.reserve(num_nodes * num_nodes * num_nodes);
+
+	BenchmarkReadsConfig config_{
+		.allow_migrations_during_reads = true,
+		.bind_read_buffer = false,
+	};
+
+	for (int pagecache = 0; pagecache < num_nodes; ++pagecache) {
+		for (int buffer = 0; buffer < num_nodes; ++buffer) {
+			for (int read = 0; read < num_nodes; ++read) {
+				config_.pagecache_core = pagecache;
+				config_.buffer_core = buffer;
+				config_.read_core = read;
+				benchmark_reads(config_, result);
+			}
+		}
+	}
+
 	result.save(output_file);
 }
 
