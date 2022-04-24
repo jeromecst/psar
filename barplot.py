@@ -48,7 +48,8 @@ def json_plot_gettime_all(json_dic, name, warmup):
 
     print(layout_times)
     df = pandas.DataFrame(json_dic)
-    pandas.set_option("display.max_rows", 65, "display.max_columns", None)
+    # pandas.set_option("display.max_rows", 65, "display.max_columns", None)
+    # print(df)
     
     fig, ax = plt.subplots(4, 1, figsize=(14, 20))
 
@@ -58,6 +59,7 @@ def json_plot_gettime_all(json_dic, name, warmup):
         plot_bar(df, i*16, (i+1)*16, axx)
         axx.set_title(f"data on node {i}")
         axx.set_xticks(xticks, xlabels)
+        axx.set_xlabel("(node )")
         axx.legend(layout)
 
     fig.savefig("plot/yeti/" + name + ".png")
@@ -69,3 +71,7 @@ layout = ["ll", "ld", "dl", "dd"]
 json_file = open("results/yeti/test_get_time_all_scenarios.json")
 json_string = json.load(json_file)["measurements"]
 json_plot_gettime_all(json_string, "test_get_time_all_scenarios", warmup)
+
+json_file = open("results/yeti/test_get_time_all_scenarios_forced.json")
+json_string = json.load(json_file)["measurements"]
+json_plot_gettime_all(json_string, "test_get_time_all_scenarios_forced", warmup)
