@@ -1,5 +1,3 @@
-import random
-
 import colorama
 import json
 from pathlib import Path
@@ -31,15 +29,12 @@ def makefig(data, out_path: Path, xstr, xticks=None, hue=None):
     fig.savefig(str(out_path) + ".png")
 
 def sub_sample(dic, warmup):
+    size = len(dic[0]["nodes"])
+    iteration = int(size / (points_to_plot))
     for numa_dic in dic:
         # these data points are not relevant (warmup)
-        numa_dic["nodes"] = numa_dic["nodes"][warmup:]
-        numa_dic["times_us"] = numa_dic["times_us"][warmup:]
-        # we have decided to only keep this amount of data points
-        nodes_sub, times_us_sub = \
-            zip(*random.sample(list(zip(numa_dic["nodes"], numa_dic["times_us"])), points_to_plot))
-        numa_dic["nodes"] = list(nodes_sub)
-        numa_dic["times_us"] = list(times_us_sub)
+        numa_dic["nodes"] = numa_dic["nodes"][warmup::iteration]
+        numa_dic["times_us"] = numa_dic["times_us"][warmup::iteration]
 
 def set_layout(dic):
     dic[0]["layout"] = "ll"
@@ -69,7 +64,7 @@ def json_plot_gettime(json_dic, name, warmup):
     makefig(df, name, "layout")
 
 warmup = 20
-points_to_plot = 300
+points_to_plot = 250
 
 for path in results_dir.glob("*/*.json"):
     print(colorama.Fore.CYAN + str(path) + colorama.Fore.RESET)
