@@ -218,10 +218,12 @@ void benchmark_reads(const BenchmarkReadsConfig &config,
 		                       ? make_node_bound_read_buffer(config.buffer_core)
 		                       : make_local_read_buffer();
 
+		// force the thread to be moved to read_core
+		// (even if config.allow_migrations_during_reads is true)
+		setaffinity_node(config.read_core);
+
 		if (config.allow_migrations_during_reads)
 			setaffinity_any();
-		else
-			setaffinity_node(config.read_core);
 
 		std::vector<long> times(config.num_iterations);
 		std::vector<unsigned int> nodes(config.num_iterations);
