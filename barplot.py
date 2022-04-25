@@ -33,13 +33,13 @@ def format_dic(dic, layout_times, warmup):
         for field in ["times_us","nodes","buffer_core","init_core","read_core"]:
             exp.pop(field, None)
 
-def plot_bar(df, _from, _to, ax):
-    x = range(_to - _from)
+def plot_bar(df, ax):
+    x = range(len(df))
     colors = ['#33cc33', '#3366ff', '#006699', '#DB4444']
-    bottom_sum = np.zeros(_to - _from)
+    bottom_sum = np.zeros(len(df))
     for i, tag in enumerate(layout):
-        ax.bar(x, df[tag][_from:_to], bottom=bottom_sum, color=colors[i])
-        bottom_sum += df[tag][_from:_to]
+        ax.bar(x, df[tag], bottom=bottom_sum, color=colors[i])
+        bottom_sum += df[tag]
 
 
 def json_plot_gettime_all(json_dic, name, warmup):
@@ -48,6 +48,7 @@ def json_plot_gettime_all(json_dic, name, warmup):
 
     print(layout_times)
     df = pandas.DataFrame(json_dic)
+
     # pandas.set_option("display.max_rows", 65, "display.max_columns", None)
     # print(df)
     
@@ -55,12 +56,12 @@ def json_plot_gettime_all(json_dic, name, warmup):
 
     xlabels = [ f"({i}, {j})" for i in range(4) for j in range(4)]
     xticks = np.arange(16) 
-    for i, axx in enumerate(np.array(ax).flat):
-        plot_bar(df, i*16, (i+1)*16, axx)
-        axx.set_title(f"data on node {i}")
-        axx.set_xticks(xticks, xlabels)
-        axx.set_xlabel("(node buffer, node read)")
-        axx.legend(layout)
+    for node_read, ax_read in enumerate(np.array(ax).flat):
+        plot_bar(df[node_read::4], ax_read)
+        ax_read.set_title(f"read on node {node_read}")
+        ax_read.set_xticks(xticks, xlabels)
+        ax_read.set_xlabel("(pagecache node, buff node)")
+        ax_read.legend(layout)
 
     fig.savefig("plot/yeti/" + name + ".png")
 
