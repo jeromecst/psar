@@ -77,8 +77,8 @@ struct BenchmarkReadsConfig {
 
 struct BenchmarkResult {
 	struct Measurements {
-		unsigned int init_core;
-		unsigned int init_node;
+		unsigned int pagecache_core;
+		unsigned int pagecache_node;
 		unsigned int read_core;
 		unsigned int read_node;
 		unsigned int buffer_core;

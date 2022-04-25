@@ -171,8 +171,8 @@ void BenchmarkResult::add_measurements(const BenchmarkReadsConfig &config,
                                        std::vector<long> times,
                                        std::vector<unsigned int> nodes) {
 	measurements.push_back(Measurements{
-		.init_core = static_cast<unsigned int>(config.pagecache_core),
-		.init_node = core_to_node(config.pagecache_core),
+		.pagecache_core = static_cast<unsigned int>(config.pagecache_core),
+		.pagecache_node = core_to_node(config.pagecache_core),
 		.read_core = static_cast<unsigned int>(config.read_core),
 		.read_node = core_to_node(config.read_core),
 		.buffer_core = static_cast<unsigned int>(config.buffer_core),
@@ -185,8 +185,8 @@ void BenchmarkResult::add_measurements(const BenchmarkReadsConfig &config,
 using json = nlohmann::json;
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(BenchmarkResult::Measurements, read_core,
-                                   read_node, init_core, init_node, buffer_core,
-                                   buffer_node, times_us, nodes)
+                                   read_node, pagecache_core, pagecache_node,
+                                   buffer_core, buffer_node, times_us, nodes)
 
 static std::string get_hostname() {
 	char hostname[HOST_NAME_MAX + 1]{};
