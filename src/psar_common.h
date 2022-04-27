@@ -129,6 +129,7 @@ void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
 
 struct BenchmarkGetTimesAllConfig {
 	bool allow_migrations_during_reads = true;
+	bool bind_read_buffer = false;
 	int num_iterations = 5000;
 };
 

@@ -353,7 +353,7 @@ void benchmark_reads_get_times_all_scenarios(
 
 	BenchmarkReadsConfig config_{
 		.allow_migrations_during_reads = config.allow_migrations_during_reads,
-		.bind_read_buffer = false,
+		.bind_read_buffer = config.bind_read_buffer,
 		.num_iterations = config.num_iterations,
 	};
 
