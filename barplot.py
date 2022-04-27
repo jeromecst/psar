@@ -1,7 +1,8 @@
 import json
+import os
+import pandas
 import numpy as np
 import seaborn as sns
-import pandas
 import matplotlib.pyplot as plt
 
 def set_layout(dic):
@@ -89,10 +90,12 @@ warmup = 20
 points_to_plot = 250
 layout = ["ll", "ld", "dl", "dd"]
 
-json_file = open("results/yeti/test_get_time_all_scenarios.json")
-json_string = json.load(json_file)["measurements"]
-json_plot_gettime_all(json_string, "test_get_time_all_scenarios", warmup)
+path = "results/yeti/"
 
-json_file = open("results/yeti/test_get_time_all_scenarios_forced.json")
-json_string = json.load(json_file)["measurements"]
-json_plot_gettime_all(json_string, "test_get_time_all_scenarios_forced", warmup)
+test_name = "test_get_time_all_scenarios"
+for suffix in ["", "_forced", "_bound", "_bound_forced"]:
+    file = f"{path}{test_name}{suffix}.json"
+    if os.path.exists(file):
+        json_file = open(file)
+        json_string = json.load(json_file)["measurements"]
+        json_plot_gettime_all(json_string,f"{test_name}{suffix}", warmup)
