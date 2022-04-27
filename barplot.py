@@ -17,16 +17,28 @@ def get_layout_times():
     layout_times = np.array([np.average(i["times_us"]) for i in dic])
     return layout_times
 
-def what_layout(layout_times, value):
+def what_layout_time(layout_times, value):
     idx = (np.abs(layout_times - value)).argmin()
     return layout[idx]
+
+def what_layout_node(node_read, node_pcache, node_buffer):
+    # (pagecache, buffer) = (local|distant, local|distant)
+    _layout = ""
+    node_read = 1 << node_read
+    for node in [1 << node_pcache, node_buffer]:
+        if (node_read == node):
+            _layout += "l"
+        else:
+            _layout += "d"
+    return _layout
 
 def format_dic(dic, layout_times, warmup):
     for exp in dic:
         list_layout = []
         exp["times_us"] = exp["times_us"][warmup:]
-        for i in exp["times_us"]:
-            list_layout += [what_layout(layout_times, i)]
+        exp["buffer_nodes"] = exp["buffer_nodes"][warmup:]
+        for i in range(len(exp["times_us"])):
+            list_layout += [what_layout_node(exp["nodes"][i], exp["pagecache_node"], exp["buffer_nodes"][i])]
         for l in layout:
             exp[l] = np.count_nonzero([x == l for x in list_layout]) / len(exp["times_us"])
         # delete useless fields
@@ -40,7 +52,7 @@ def barplot(df, ax):
     for i, tag in enumerate(layout):
         ax.bar(x, df[tag], bottom=bottom_sum, color=colors[i])
         bottom_sum += df[tag]
-    ax_read.legend(layout)
+    ax.legend(layout)
 
 def violinplot(df, ax):
     x = range(len(df))
@@ -60,14 +72,13 @@ def json_plot_gettime_all(json_dic, name, warmup):
     # pandas.set_option("display.max_rows", 65, "display.max_columns", None)
     # print(df)
 
-    
     fig, ax = plt.subplots(4, 1, figsize=(14, 20))
 
     xlabels = [ f"({i}, {j})" for i in range(4) for j in range(4)]
     xticks = np.arange(16) 
     for node_read, ax_read in enumerate(np.array(ax).flat):
-        # barplot(df[node_read::4], ax_read)
-        violinplot(df[node_read::4], ax_read)
+        barplot(df[node_read::4], ax_read)
+        # violinplot(df[node_read::4], ax_read)
         ax_read.set_title(f"read on node {node_read}")
         ax_read.set_xticks(xticks, xlabels)
         ax_read.set_xlabel("(pagecache node, buff node)")
