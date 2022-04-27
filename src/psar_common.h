@@ -87,11 +87,14 @@ struct BenchmarkResult {
 		std::vector<long> times_us;
 		/// the active node at the end of each sample
 		std::vector<unsigned int> nodes;
+		/// the nodes on which the read buffer is allocated at the end of a read
+		std::vector<unsigned int> buffer_nodes;
 	};
 
 	void add_measurements(const BenchmarkReadsConfig &config,
 	                      std::vector<long> times,
-	                      std::vector<unsigned int> nodes);
+	                      std::vector<unsigned int> nodes,
+	                      std::vector<unsigned int> buffer_nodes);
 
 	void save(const std::string &output_file);
 

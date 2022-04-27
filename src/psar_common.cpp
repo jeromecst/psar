@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iostream>
 #include <numa.h>
+#include <numaif.h>
 #include <pthread.h>
 #include <sys/stat.h>
 #include <thread>
@@ -169,7 +170,8 @@ unsigned int get_current_node() {
 
 void BenchmarkResult::add_measurements(const BenchmarkReadsConfig &config,
                                        std::vector<long> times,
-                                       std::vector<unsigned int> nodes) {
+                                       std::vector<unsigned int> nodes,
+                                       std::vector<unsigned int> buffer_nodes) {
 	measurements.push_back(Measurements{
 		.pagecache_core = static_cast<unsigned int>(config.pagecache_core),
 		.pagecache_node = core_to_node(config.pagecache_core),
@@ -179,6 +181,7 @@ void BenchmarkResult::add_measurements(const BenchmarkReadsConfig &config,
 		.buffer_node = core_to_node(config.buffer_core),
 		.times_us = std::move(times),
 		.nodes = std::move(nodes),
+		.buffer_nodes = std::move(buffer_nodes),
 	});
 }
 
@@ -186,7 +189,8 @@ using json = nlohmann::json;
 
 NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(BenchmarkResult::Measurements, read_core,
                                    read_node, pagecache_core, pagecache_node,
-                                   buffer_core, buffer_node, times_us, nodes)
+                                   buffer_core, buffer_node, times_us, nodes,
+                                   buffer_nodes)
 
 static std::string get_hostname() {
 	char hostname[HOST_NAME_MAX + 1]{};
@@ -200,6 +204,28 @@ void BenchmarkResult::save(const std::string &output_file) {
 	root["measurements"] = measurements;
 	std::ofstream o{output_file};
 	o << root;
+}
+
+/// Returns the set of nodes on which a buffer is allocated
+static unsigned int get_buffer_nodes(void *ptr, size_t len) {
+	unsigned int nodes = 0;
+	const long page_size = sysconf(_SC_PAGESIZE);
+
+	for (auto addr = uintptr_t(ptr); addr < uintptr_t(ptr) + len;
+	     addr += page_size) {
+		int node = 0;
+
+		long ret =
+			get_mempolicy(&node, nullptr, 0, reinterpret_cast<void *>(addr),
+		                  MPOL_F_NODE | MPOL_F_ADDR);
+
+		if (ret < 0)
+			throw std::runtime_error("get_mempolicy failed");
+
+		nodes |= 1 << node;
+	}
+
+	return nodes;
 }
 
 void benchmark_reads(const BenchmarkReadsConfig &config,
@@ -227,16 +253,20 @@ void benchmark_reads(const BenchmarkReadsConfig &config,
 
 		std::vector<long> times(config.num_iterations);
 		std::vector<unsigned int> nodes(config.num_iterations);
+		std::vector<unsigned int> buffer_nodes(config.num_iterations);
 		for (int i = 0; i < config.num_iterations; ++i) {
 			times[i] = time_us(
 				[&] { read_file(read_buffer.data(), read_buffer.size()); });
 			nodes[i] = get_current_node();
+			buffer_nodes[i] =
+				get_buffer_nodes(read_buffer.data(), read_buffer.size());
 		}
 
 		std::cout << " read_core=" << config.read_core
 				  << " buffer_core=" << config.buffer_core
 				  << " pagecache_core=" << config.pagecache_core << '\n';
-		result.add_measurements(config, std::move(times), std::move(nodes));
+		result.add_measurements(config, std::move(times), std::move(nodes),
+		                        std::move(buffer_nodes));
 	};
 
 	// start a new thread to ensure the internal NUMA balancing stats
