@@ -37,10 +37,10 @@ def sub_sample(dic, warmup):
         numa_dic["times_us"] = numa_dic["times_us"][warmup::iteration]
 
 def set_layout(dic):
-    dic[0]["layout"] = "ll"
-    dic[1]["layout"] = "ld"
-    dic[2]["layout"] = "dl"
-    dic[3]["layout"] = "dd"
+    dic[0]["layout"] = "LL"
+    dic[1]["layout"] = "LD"
+    dic[2]["layout"] = "DL"
+    dic[3]["layout"] = "DD"
 
 def init_dataframe(dic):
     df = pandas.DataFrame(dic)

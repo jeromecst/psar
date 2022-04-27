@@ -6,10 +6,10 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 def set_layout(dic):
-    dic[0]["layout"] = "ll"
-    dic[1]["layout"] = "ld"
-    dic[2]["layout"] = "dl"
-    dic[3]["layout"] = "dd"
+    dic[0]["layout"] = "LL"
+    dic[1]["layout"] = "LD"
+    dic[2]["layout"] = "DL"
+    dic[3]["layout"] = "DD"
 
 def get_layout_times():
     f = open("results/yeti/test_get_time.json")
@@ -28,9 +28,9 @@ def what_layout_node(node_read, node_pcache, node_buffer):
     node_read = 1 << node_read
     for node in [1 << node_pcache, node_buffer]:
         if (node_read == node):
-            _layout += "l"
+            _layout += "L"
         else:
-            _layout += "d"
+            _layout += "D"
     return _layout
 
 def format_dic(dic, layout_times, warmup):
@@ -51,7 +51,7 @@ def barplot(df, ax):
     colors = ['#33cc33', '#3366ff', '#006699', '#DB4444']
     bottom_sum = np.zeros(len(df))
     for i, tag in enumerate(layout):
-        ax.bar(x, df[tag], bottom=bottom_sum, color=colors[i])
+        ax.bar(x, df[tag], bottom=bottom_sum, color=colors[i], width=.95)
         bottom_sum += df[tag]
     ax.legend(layout)
 
@@ -89,7 +89,7 @@ def json_plot_gettime_all(json_dic, name, warmup):
 
 warmup = 20
 points_to_plot = 250
-layout = ["ll", "ld", "dl", "dd"]
+layout = ["LL", "LD", "DL", "DD"]
 
 path = "results/yeti/"
 
