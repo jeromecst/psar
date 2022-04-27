@@ -120,7 +120,8 @@ void read_file(char *buf, size_t size) {
 	}
 	ssize_t total = 0;
 	ssize_t sz;
-	while ((sz = read(fd, buf + total, size - total)) > 0) {
+	while ((sz = read(fd, buf + total,
+	                  std::min<size_t>(0x2000, size - total))) > 0) {
 		total += sz;
 	}
 	if (total != st.st_size) {
