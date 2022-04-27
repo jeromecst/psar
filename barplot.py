@@ -83,6 +83,7 @@ def json_plot_gettime_all(json_dic, name, warmup):
         ax_read.set_title(f"read on node {node_read}")
         ax_read.set_xticks(xticks, xlabels)
         ax_read.set_xlabel("(pagecache node, buff node)")
+    fig.suptitle(name, fontsize=16)
 
     fig.savefig("plot/yeti/" + name + ".png")
 
