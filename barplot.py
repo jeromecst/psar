@@ -51,7 +51,7 @@ def format_dic(dic, layout_times, warmup):
 
 def barplot(df, ax, separator = 4):
     # df.reset_index(drop=True, inplace=True)
-    dummy_row = df.iloc[:1]
+    dummy_row = df.iloc[:1].copy()
     for i in layout:
         dummy_row[i] = 0
     for i in range(separator, 1, -1):
