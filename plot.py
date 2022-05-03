@@ -8,7 +8,7 @@ import numpy as np
 import seaborn as sns
 fontsize = 18
 plt.rcParams['font.size'] = fontsize
-colors = ['green', 'orange', 'yellow', '#8E0000', 'white']
+colors = ['#15E476', '#E48A15', '#E6E626', '#EB4545', 'white']
 
 # ax = sns.violinplot(x="read_node", y=data["times_ms"].astype(int), data=data, ax=ax)
 
@@ -17,15 +17,15 @@ results_dir = Path('results/')
 def makefig(data, out_path: Path, xstr, xticks=None, hue=None):
     fig, ax = plt.subplots(1, 1, figsize=(15,8))
     fig.suptitle(f"{out_path.stem} @ {out_path.parent.stem}", fontsize=fontsize+2)
-    ax = sns.swarmplot(x=xstr, y="times_per_byte", hue=hue, data=data, size=3, palette=colors)
+    ax = sns.swarmplot(x=xstr, y="times_per_page", hue=hue, data=data, size=3, palette=colors)
     method = "swarmplot"
-    title = "real time to read 1 byte for each"
+    title = "real time to read 1 page for each"
     ax.set_title(f"{title} {xstr} ({method})")
     ax.set_xlabel(xstr)
     if xticks != None:
         ax.set_xticks(xticks)
-    ax.set_yticks(np.linspace(0, max(data["times_per_byte"]), 20))
-    ax.set_ylabel("time (s)")
+    ax.set_yticks(np.linspace(0, max(data["times_per_page"]), 20))
+    ax.set_ylabel("time (μs)")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(str(out_path) + ".png")
 
@@ -47,7 +47,7 @@ def init_dataframe(dic):
     df = pandas.DataFrame(dic)
     df = df.explode(['times_us', 'nodes'], ignore_index=True)
     df["times_ms"] = df["times_us"] / 1E3
-    df["times_per_byte"] = df["times_ms"] * 1E-3 / 50E6 # 50 Mb file
+    df["times_per_page"] = df["times_us"] / 0x1000 # 1 page
     return df
 
 def json_plot(json_dic, name, warmup):
