@@ -8,6 +8,7 @@ import numpy as np
 import seaborn as sns
 fontsize = 18
 plt.rcParams['font.size'] = fontsize
+colors = ['green', 'orange', 'yellow', '#8E0000', 'white']
 
 # ax = sns.violinplot(x="read_node", y=data["times_ms"].astype(int), data=data, ax=ax)
 
@@ -16,7 +17,7 @@ results_dir = Path('results/')
 def makefig(data, out_path: Path, xstr, xticks=None, hue=None):
     fig, ax = plt.subplots(1, 1, figsize=(15,8))
     fig.suptitle(f"{out_path.stem} @ {out_path.parent.stem}", fontsize=fontsize+2)
-    ax = sns.swarmplot(x=xstr, y="times_per_byte", hue=hue, data=data, size=3)
+    ax = sns.swarmplot(x=xstr, y="times_per_byte", hue=hue, data=data, size=3, palette=colors)
     method = "swarmplot"
     title = "real time to read 1 byte for each"
     ax.set_title(f"{title} {xstr} ({method})")
@@ -71,7 +72,5 @@ for path in results_dir.glob("*/*.json"):
     with path.open("rb") as json_file:
         json_string = json.load(json_file)["measurements"]
         name = Path("plot/") / path.relative_to(results_dir)
-        if "get_time" in str(path):
+        if "get_time.json" in str(path):
             json_plot_gettime(json_string, name, warmup)
-        else:
-            json_plot(json_string, name, warmup)
