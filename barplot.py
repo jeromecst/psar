@@ -4,6 +4,9 @@ import pandas
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+pandas.set_option("display.max_rows", 10, "display.max_columns", None)
+
+colors = ['green', 'orange', 'yellow', '#8E0000', 'white']
 
 def set_layout(dic):
     dic[0]["layout"] = "LL"
@@ -43,25 +46,25 @@ def format_dic(dic, layout_times, warmup):
         for l in layout:
             exp[l] = np.count_nonzero([x == l for x in list_layout]) / len(exp["times_us"])
         # delete useless fields
-        for field in ["nodes","buffer_core","init_core","read_core"]:
+        for field in ["times_us", "nodes","buffer_core","init_core","read_core"]:
             exp.pop(field, None)
 
-def barplot(df, ax):
-    x = range(len(df))
-    colors = ['#33cc33', '#3366ff', '#006699', '#DB4444']
-    bottom_sum = np.zeros(len(df))
+def barplot(df, ax, separator = 4):
+    # df.reset_index(drop=True, inplace=True)
+    dummy_row = df.iloc[:1]
+    for i in layout:
+        dummy_row[i] = 0
+    for i in range(separator, 1, -1):
+        j = (i - 1)*4
+        df = pandas.concat([df.iloc[:j], dummy_row, df.iloc[j:]], ignore_index = True)
+
+    length = len(df)
+    x = range(length)
+    bottom_sum = np.zeros(length)
     for i, tag in enumerate(layout):
         ax.bar(x, df[tag], bottom=bottom_sum, color=colors[i], width=.95)
         bottom_sum += df[tag]
     ax.legend(layout)
-
-def violinplot(df, ax):
-    x = range(len(df))
-    colors = ['#33cc33', '#3366ff', '#006699', '#DB4444']
-    bottom_sum = np.zeros(len(df))
-    for index, row in df.iterrows():
-        df["times_us"][index] = np.array(row["times_us"])[np.array(row["times_us"]) < 25000]
-    ax.violinplot(df["times_us"], np.array(x))
 
 def json_plot_gettime_all(json_dic, name, warmup):
     layout_times = get_layout_times()
@@ -70,16 +73,13 @@ def json_plot_gettime_all(json_dic, name, warmup):
     print(layout_times)
     df = pandas.DataFrame(json_dic)
 
-    # pandas.set_option("display.max_rows", 65, "display.max_columns", None)
-    # print(df)
-
     fig, ax = plt.subplots(4, 1, figsize=(14, 20))
 
-    xlabels = [ f"({i}, {j})" for i in range(4) for j in range(4)]
-    xticks = np.arange(16) 
+    xlabels = [ f"({i}, {j})" if j < 4 else "" for i in range(4) for j in range(5)]
+    xlabels.pop()
+    xticks = np.arange(len(xlabels)) 
     for node_read, ax_read in enumerate(np.array(ax).flat):
-        barplot(df[node_read::4], ax_read)
-        # violinplot(df[node_read::4], ax_read)
+        barplot(df[node_read::4].copy(deep=True), ax_read)
         ax_read.set_title(f"read on node {node_read}")
         ax_read.set_xticks(xticks, xlabels)
         ax_read.set_xlabel("(pagecache node, buff node)")
