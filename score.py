@@ -16,14 +16,23 @@ def get_score_scenario(json_dic, name, warmup):
     layout_times = barplot.get_layout_times()
     barplot.format_dic(json_dic, layout_times, warmup)
     df = pandas.DataFrame(json_dic)
+    
+    read_buffer_pagecache = df[df["read_node"] == df["pagecache_node"]]
+    read_buffer_pagecache = read_buffer_pagecache[read_buffer_pagecache["read_node"] == read_buffer_pagecache["buffer_node"]]
+    
     read_buffer = df[df["read_node"] == df["buffer_node"]]
+    read_buffer = read_buffer.drop(read_buffer_pagecache.index)
+    
     read_pagecache = df[df["read_node"] == df["pagecache_node"]]
-    score_tab = np.zeros(4)
+    read_pagecache = read_pagecache.drop(read_buffer_pagecache.index)
+    
     neq = df[df["read_node"] != df["pagecache_node"]]
-    neq = neq[neq["read_node"] != neq["pagecache_node"]]
-    for i, sub_data in enumerate([read_pagecache, read_buffer, neq]):
+    neq = neq[neq["read_node"] != neq["buffer_node"]]
+    
+    score_tab = np.zeros(5)
+    for i, sub_data in enumerate([read_buffer_pagecache, read_pagecache, read_buffer, neq]):
         score_tab[i] = get_score(sub_data)
-    score_tab[3] = np.average(score_tab[:-1])
+    score_tab[-1] = get_score(df)
     return np.array([score_tab])
 
 def heatmap(data, row_labels, col_labels, ax=None,
@@ -142,7 +151,7 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
     return texts
 
 if __name__ == '__main__':
-    score = np.array([[0,0,0,0]])
+    score = np.array([[0,0,0,0,0]])
     test_name = "test_get_time_all_scenarios"
     for suffix in ["", "_forced", "_bound", "_bound_forced"]:
         file = f"{barplot.path}{test_name}{suffix}.json"
@@ -156,7 +165,7 @@ if __name__ == '__main__':
 fig, ax = plt.subplots()
 
 scenario = ["thread/buffer can migrate", "buffer can migrate", "thread can migrate", "no migration"]
-layout = ["read node = pagecache node", "read node = buffer node", "read node != pagecache/buffer", "average"]
+layout = ["R = P = B", "R = P, R ≠ B", "R = B, R ≠ P", "R ≠ P/B", "average"]
 score = score[1:]
               
 im, cbar = heatmap(score, scenario, layout, ax=ax,
