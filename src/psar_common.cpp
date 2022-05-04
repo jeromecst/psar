@@ -166,7 +166,11 @@ static unsigned int core_to_node(unsigned int core) {
 }
 
 unsigned int get_current_node() {
-	return core_to_node(sched_getcpu());
+	unsigned int node;
+	if (getcpu(nullptr, &node) != 0)
+		throw std::runtime_error("getcpu failed");
+
+	return node;
 }
 
 void BenchmarkResult::add_measurements(const BenchmarkReadsConfig &config,
@@ -207,13 +211,14 @@ void BenchmarkResult::save(const std::string &output_file) {
 	o << root;
 }
 
+static const long PAGE_SIZE = sysconf(_SC_PAGESIZE);
+
 /// Returns the set of nodes on which a buffer is allocated
 static unsigned int get_buffer_nodes(void *ptr, size_t len) {
 	unsigned int nodes = 0;
-	const long page_size = sysconf(_SC_PAGESIZE);
 
 	for (auto addr = uintptr_t(ptr); addr < uintptr_t(ptr) + len;
-	     addr += page_size) {
+	     addr += PAGE_SIZE) {
 		int node = 0;
 
 		long ret =
