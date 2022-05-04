@@ -164,4 +164,4 @@ im, cbar = heatmap(score, scenario, layout, ax=ax,
 texts = annotate_heatmap(im, valfmt="{x:.2f}")
 
 fig.tight_layout()
-plt.show()
+fig.savefig("score.png")
