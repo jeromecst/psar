@@ -93,7 +93,7 @@ def json_plot_gettime_all(json_dic, name, warmup):
     layout_times = get_layout_times()
     format_dic(json_dic, layout_times, warmup)
 
-    print(layout_times)
+    # print(layout_times)
     df = pandas.DataFrame(json_dic)
 
     fig, ax = plt.subplots(4, 1, figsize=(14, 20))
@@ -117,10 +117,12 @@ layout = ["LL", "LD", "DL", "DD"]
 
 path = "results/yeti/"
 
-test_name = "test_get_time_all_scenarios"
-for suffix in ["", "_forced", "_bound", "_bound_forced"]:
-    file = f"{path}{test_name}{suffix}.json"
-    if os.path.exists(file):
-        json_file = open(file)
-        json_string = json.load(json_file)["measurements"]
-        json_plot_gettime_all(json_string,f"{test_name}{suffix}", warmup)
+if __name__ == '__main__':
+    test_name = "test_get_time_all_scenarios"
+    for suffix in ["", "_forced", "_bound", "_bound_forced"]:
+        file = f"{path}{test_name}{suffix}.json"
+        if os.path.exists(file):
+            print(file)
+            json_file = open(file)
+            json_string = json.load(json_file)["measurements"]
+            json_plot_gettime_all(json_string,f"{test_name}{suffix}", warmup)
