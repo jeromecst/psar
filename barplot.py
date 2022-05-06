@@ -81,7 +81,7 @@ def barplot(df, ax, separator = 4):
     for row in x:
         bottom_sum = 0
         if row > 0 and (row + 1) % 5 == 0:
-            continue 
+            continue
         for _layout in df.iloc[row]["list_layout"]:
             color_id = np.argwhere(np.array(layout) == _layout)[0][0]
             bottom_sum += 1
@@ -98,10 +98,10 @@ def json_plot_gettime_all(json_dic, name, warmup):
 
     fig, ax = plt.subplots(4, 1, figsize=(14, 20))
 
-    xlabels = [ f"({i}, {j})" if j < 4 else "" for i in range(4) for j in range(5)]
-    xlabels.pop()
-    xticks = np.arange(len(xlabels)) 
     for node_read, ax_read in enumerate(np.array(ax).flat):
+        xlabels = [ f"({i}, {node_read}, {j})" if j < 4 else "" for i in range(4) for j in range(5)]
+        xlabels.pop()
+        xticks = np.arange(len(xlabels))
         barplot(df[node_read::4].copy(deep=True), ax_read)
         ax_read.set_title(f"read on node {node_read}")
         ax_read.set_xticks(xticks, xlabels)
