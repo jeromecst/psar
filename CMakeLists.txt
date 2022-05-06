@@ -18,6 +18,8 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 set(JSON_Install OFF CACHE INTERNAL "")
 add_subdirectory(lib/json)
 
+add_subdirectory(lib/CLI11)
+
 add_library(psar_common OBJECT
 src/psar_common.cpp
 src/psar_common.h
@@ -25,7 +27,10 @@ src/rng.h
 )
 target_include_directories(psar_common PUBLIC lib/)
 target_link_libraries(psar_common PUBLIC pthread numa)
-target_link_libraries(psar_common PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(psar_common PRIVATE
+nlohmann_json::nlohmann_json
+CLI11::CLI11
+)
 
 add_executable(test_distant_reads_distant_buffer_forced src/test_distant_reads_distant_buffer_forced.cpp)
 target_link_libraries(test_distant_reads_distant_buffer_forced PRIVATE psar_common)

@@ -3,7 +3,6 @@
 #include <chrono>
 #include <cstdio>
 #include <iostream>
-#include <optional>
 #include <span>
 #include <string>
 #include <thread>
@@ -141,6 +140,7 @@ struct BenchmarkGetTimesAllConfig {
 void benchmark_reads_get_times_all_scenarios(
 	const BenchmarkGetTimesAllConfig &config, const std::string &output_file);
 
-std::optional<int> get_num_iterations(int argc, const char **argv);
+void parse_get_times_all_config(BenchmarkGetTimesAllConfig *config, int argc,
+                                const char **argv);
 
 } // namespace psar
