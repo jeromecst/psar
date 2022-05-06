@@ -42,6 +42,7 @@ NumaBuffer make_node_bound_read_buffer(unsigned int node);
 NumaBuffer make_local_read_buffer();
 
 void read_file(char *buf, size_t buf_size);
+void read_file_random(char *buf, size_t buf_size);
 
 void setaffinity(unsigned int core);
 void setaffinity_node(unsigned int node);
@@ -70,6 +71,8 @@ struct BenchmarkReadsConfig {
 	/// whether the read buffer should be bound to buffer_core
 	/// (if true, the buffer will never be migrated automatically)
 	bool bind_read_buffer = false;
+	/// perform random reads (read random chunks of ReadChunkSize bytes)
+	bool random_reads = false;
 	int pagecache_core = 0;
 	int read_core = 0;
 	int buffer_core = 0;
@@ -131,6 +134,7 @@ void benchmark_reads_get_times(const BenchmarkGetTimesConfig &config,
 struct BenchmarkGetTimesAllConfig {
 	bool allow_migrations_during_reads = true;
 	bool bind_read_buffer = false;
+	bool random_reads = false;
 	int num_iterations = 5000;
 };
 

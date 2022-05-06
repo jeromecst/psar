@@ -21,6 +21,7 @@ add_subdirectory(lib/json)
 add_library(psar_common OBJECT
 src/psar_common.cpp
 src/psar_common.h
+src/rng.h
 )
 target_include_directories(psar_common PUBLIC lib/)
 target_link_libraries(psar_common PUBLIC pthread numa)
