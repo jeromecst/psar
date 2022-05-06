@@ -16,6 +16,9 @@
 #include <unistd.h>
 #include <utility>
 
+#include <CLI/App.hpp>
+#include <CLI/Config.hpp>
+#include <CLI/Formatter.hpp>
 #include <nlohmann/json.hpp>
 
 #include "rng.h"
@@ -432,11 +435,12 @@ void benchmark_reads_get_times_all_scenarios(
 	result.save(output_file);
 }
 
-std::optional<int> get_num_iterations(int argc, const char **argv) {
-	if (argc < 2)
-		return std::nullopt;
-
-	return std::atoi(argv[1]);
+void parse_get_times_all_config(BenchmarkGetTimesAllConfig *config, int argc,
+                                const char **argv) {
+	CLI::App app;
+	app.add_flag("-r,--random", config->random_reads, "use random reads");
+	app.add_option("-i,--iterations", config->num_iterations);
+	app.parse(argc, argv);
 }
 
 } // namespace psar
