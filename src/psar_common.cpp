@@ -18,6 +18,8 @@
 
 #include <nlohmann/json.hpp>
 
+#include "rng.h"
+
 namespace psar {
 
 namespace {
@@ -123,6 +125,50 @@ void read_file(char *buf, size_t size) {
 	while ((sz = read(fd, buf + total,
 	                  std::min<size_t>(0x2000, size - total))) > 0) {
 		total += sz;
+	}
+	if (total != st.st_size) {
+		printf("erreur %zd\n", total);
+		exit(1);
+	}
+	close(fd);
+}
+
+void read_file_random(char *buf, size_t size) {
+	static constexpr size_t ReadChunkSize = 0x2000;
+	struct stat st {};
+
+	if (stat(TestFileName, &st) != 0) {
+		perror("stat");
+		exit(1);
+	}
+
+	if (!buf || size != size_t(st.st_size))
+		throw std::runtime_error("incorrect buffer size");
+
+	if (size < ReadChunkSize)
+		throw std::runtime_error("file is too small for random reads");
+
+	Random rng{12345678};
+	// subtract ReadChunkSize to ensure we can always read an entire chunk
+	std::uniform_int_distribution<long> distrib(0,
+	                                            ssize_t(size - ReadChunkSize));
+
+	int fd = open(TestFileName, O_RDONLY);
+	if (fd < 0) {
+		perror("open");
+		exit(1);
+	}
+	ssize_t total = 0;
+	ssize_t sz;
+	while ((sz = read(fd, buf + total,
+	                  std::min<size_t>(ReadChunkSize, size - total))) > 0) {
+		total += sz;
+
+		const long offset = distrib(rng);
+		if (lseek(fd, offset, SEEK_SET) == -1) {
+			throw std::runtime_error(std::string("lseek failed: ") +
+			                         std::to_string(offset));
+		}
 	}
 	if (total != st.st_size) {
 		printf("erreur %zd\n", total);
@@ -260,9 +306,17 @@ void benchmark_reads(const BenchmarkReadsConfig &config,
 		std::vector<long> times(config.num_iterations);
 		std::vector<unsigned int> nodes(config.num_iterations);
 		std::vector<unsigned int> buffer_nodes(config.num_iterations);
+		const auto random_reads = config.random_reads;
 		for (int i = 0; i < config.num_iterations; ++i) {
-			times[i] = time_us(
-				[&] { read_file(read_buffer.data(), read_buffer.size()); });
+			if (random_reads) {
+				times[i] = time_us([&] {
+					read_file_random(read_buffer.data(), read_buffer.size());
+				});
+			} else {
+				times[i] = time_us(
+					[&] { read_file(read_buffer.data(), read_buffer.size()); });
+			}
+
 			nodes[i] = get_current_node();
 			buffer_nodes[i] =
 				get_buffer_nodes(read_buffer.data(), read_buffer.size());
@@ -360,6 +414,7 @@ void benchmark_reads_get_times_all_scenarios(
 	BenchmarkReadsConfig config_{
 		.allow_migrations_during_reads = config.allow_migrations_during_reads,
 		.bind_read_buffer = config.bind_read_buffer,
+		.random_reads = config.random_reads,
 		.num_iterations = config.num_iterations,
 	};
 
