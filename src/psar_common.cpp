@@ -377,4 +377,11 @@ void benchmark_reads_get_times_all_scenarios(
 	result.save(output_file);
 }
 
+std::optional<int> get_num_iterations(int argc, const char **argv) {
+	if (argc < 2)
+		return std::nullopt;
+
+	return std::atoi(argv[1]);
+}
+
 } // namespace psar
