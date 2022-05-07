@@ -1,7 +1,8 @@
 .idea
 .vscode
-
+__pycache__
 build/
 results/
 plot/
 fichiertest
+score.png
