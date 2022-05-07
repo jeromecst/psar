@@ -13,8 +13,7 @@ def get_score(df):
     return score
 
 def get_score_scenario(json_dic, name, warmup):
-    layout_times = barplot.get_layout_times()
-    barplot.format_dic(json_dic, layout_times, warmup)
+    barplot.format_dic(json_dic, warmup)
     df = pandas.DataFrame(json_dic)
     
     read_buffer_pagecache = df[df["read_node"] == df["pagecache_node"]]
