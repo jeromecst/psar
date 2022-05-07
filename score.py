@@ -8,8 +8,8 @@ import matplotlib
 
 def get_score(df):
     score = 0
-    score += 3*np.sum(df['LL']) + 2*np.sum(df['DL']) + np.sum(df['LD'])
-    score /= 3*len(df)
+    score += 2*np.sum(df['LL']) + np.sum(df['DL']) + np.sum(df['LD'])
+    score /= 2*len(df)
     return score
 
 def get_score_scenario(json_dic, name, warmup):
