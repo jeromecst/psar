@@ -99,14 +99,13 @@ def json_plot_gettime_all(json_dic, name, warmup):
     fig, ax = plt.subplots(4, 1, figsize=(14, 20))
 
     for node_read, ax_read in enumerate(np.array(ax).flat):
-        xlabels = [ f"({i}, {node_read}, {j})" if j < 4 else "" for i in range(4) for j in range(5)]
+        xlabels = [ f"({i},{node_read},{j})" if j < 4 else "" for i in range(4) for j in range(5)]
         xlabels.pop()
         xticks = np.arange(len(xlabels))
         barplot(df[node_read::4].copy(deep=True), ax_read)
-        ax_read.set_title(f"read on node {node_read}")
+        ax_read.set_title(f"reads on node {node_read}")
         ax_read.set_xticks(xticks, xlabels)
-        ax_read.set_xlabel("(pagecache node, buff node)")
-        ax_read.set_ylabel("number of iterations")
+        ax_read.set_ylabel("iteration number")
     fig.suptitle(name, fontsize=16)
 
     fig.savefig("plot/yeti/" + name + ".png")
