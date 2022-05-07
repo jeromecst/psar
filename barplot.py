@@ -37,7 +37,7 @@ def what_layout_node(node_read, node_pcache, node_buffer):
             _layout += "D"
     return _layout
 
-def format_dic(dic, layout_times, warmup):
+def format_dic(dic, warmup):
     for exp in dic:
         list_layout = []
         exp["times_us"] = exp["times_us"][warmup:]
@@ -90,10 +90,8 @@ def barplot(df, ax, separator = 4):
     ax.legend([patch.Patch(color=colors[0]), patch.Patch(color=colors[1]), patch.Patch(color=colors[2]), patch.Patch(color=colors[3])], layout, loc='upper right')
 
 def json_plot_gettime_all(json_dic, name, warmup):
-    layout_times = get_layout_times()
-    format_dic(json_dic, layout_times, warmup)
+    format_dic(json_dic, warmup)
 
-    # print(layout_times)
     df = pandas.DataFrame(json_dic)
 
     fig, ax = plt.subplots(4, 1, figsize=(14, 20))
