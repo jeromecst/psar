@@ -67,7 +67,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
 
     # Create colorbar
     cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
-    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
+    cbar.ax.set_ylabel(cbarlabel, rotation=0, va="bottom")
 
     # Show all ticks and label them with the respective list entries.
     ax.set_xticks(np.arange(data.shape[1]), labels=col_labels)
@@ -78,7 +78,7 @@ def heatmap(data, row_labels, col_labels, ax=None,
                    labeltop=True, labelbottom=False)
 
     # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=-30, ha="right",
+    plt.setp(ax.get_xticklabels(), rotation=0, ha="center",
              rotation_mode="anchor")
 
     # Turn spines off and create white grid.
@@ -165,7 +165,7 @@ if __name__ == '__main__':
 fig, ax = plt.subplots()
 
 scenario = ["thread/buffer can migrate", "buffer can migrate", "thread can migrate", "no migration"]
-layout = ["R = P = B", "R = P, R ≠ B", "R = B, R ≠ P", "R ≠ P/B", "average"]
+layout = ["LL", "LD", "DL", "DD", "average"]
 score = score[1:]
               
 im, cbar = heatmap(score, scenario, layout, ax=ax,
