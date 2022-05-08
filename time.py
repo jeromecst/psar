@@ -47,7 +47,7 @@ def init_dataframe(dic):
     df = pandas.DataFrame(dic)
     df = df.explode(['times_us', 'nodes'], ignore_index=True)
     df["times_ms"] = df["times_us"] / 1E3
-    df["times_per_page"] = df["times_us"] / 0x1000 # 1 page
+    df["times_per_page"] = df["times_us"] * (0x1000 / 51200000) # 1 page
     return df
 
 def json_plot(json_dic, name, warmup):
