@@ -16,6 +16,9 @@ def get_score_scenario(json_dic, name, warmup):
     barplot.format_dic(json_dic, warmup)
     df = pandas.DataFrame(json_dic)
     
+    neq = df[df["read_node"] != df["pagecache_node"]]
+    neq = neq[neq["read_node"] != neq["buffer_node"]]
+    
     read_buffer_pagecache = df[df["read_node"] == df["pagecache_node"]]
     read_buffer_pagecache = read_buffer_pagecache[read_buffer_pagecache["read_node"] == read_buffer_pagecache["buffer_node"]]
     
@@ -25,11 +28,8 @@ def get_score_scenario(json_dic, name, warmup):
     read_pagecache = df[df["read_node"] == df["pagecache_node"]]
     read_pagecache = read_pagecache.drop(read_buffer_pagecache.index)
     
-    neq = df[df["read_node"] != df["pagecache_node"]]
-    neq = neq[neq["read_node"] != neq["buffer_node"]]
-    
     score_tab = np.zeros(5)
-    for i, sub_data in enumerate([neq, read_pagecache, read_buffer, read_buffer_pagecache]):
+    for i, sub_data in enumerate([read_buffer_pagecache, read_pagecache, read_buffer, neq]):
         score_tab[i] = get_score(sub_data)
     score_tab[-1] = get_score(df)
     return np.array([score_tab])
@@ -152,7 +152,7 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
 if __name__ == '__main__':
     score = np.array([[0,0,0,0,0]])
     test_name = "test_get_time_all_scenarios"
-    for suffix in ["", "_forced", "_bound", "_bound_forced"]:
+    for suffix in ["_bound_forced", "_forced", "_bound", ""]:
         file = f"{barplot.path}{test_name}{suffix}.json"
         if os.path.exists(file):
             print(file)
