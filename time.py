@@ -27,7 +27,7 @@ def makefig(data, out_path: Path, xstr, xticks=None, hue=None):
     ax.set_yticks(np.linspace(0, max(data["times_per_page"]), 20))
     ax.set_ylabel("time (μs)")
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(str(out_path) + ".png")
+    fig.savefig(str(out_path) + ".svg")
 
 def sub_sample(dic, warmup):
     size = len(dic[0]["nodes"])

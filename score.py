@@ -172,4 +172,4 @@ im, cbar = heatmap(score, scenario, layout, ax=ax,
 texts = annotate_heatmap(im, valfmt="{x:.2f}")
 
 fig.tight_layout()
-fig.savefig("plot/yeti/score_default.png")
+fig.savefig("plot/yeti/score_default.svg")
