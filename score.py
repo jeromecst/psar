@@ -29,7 +29,7 @@ def get_score_scenario(json_dic, name, warmup):
     neq = neq[neq["read_node"] != neq["buffer_node"]]
     
     score_tab = np.zeros(5)
-    for i, sub_data in enumerate([read_buffer_pagecache, read_pagecache, read_buffer, neq]):
+    for i, sub_data in enumerate([neq, read_pagecache, read_buffer, read_buffer_pagecache]):
         score_tab[i] = get_score(sub_data)
     score_tab[-1] = get_score(df)
     return np.array([score_tab])
@@ -163,7 +163,7 @@ if __name__ == '__main__':
 
 fig, ax = plt.subplots()
 
-scenario = ["thread/buffer can migrate", "buffer can migrate", "thread can migrate", "no migration"]
+scenario = ["no migration", "buffer can migrate", "thread can migrate", "thread/buffer can migrate"]
 layout = ["LL", "LD", "DL", "DD", "average"]
 score = score[1:]
               
