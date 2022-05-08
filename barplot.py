@@ -108,7 +108,7 @@ def json_plot_gettime_all(json_dic, name, warmup):
 
     fig.savefig("plot/yeti/" + name + ".png")
 
-warmup = 20
+warmup = 0
 points_to_plot = 250
 layout = ["LL", "LD", "DL", "DD"]
 
