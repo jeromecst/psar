@@ -164,7 +164,7 @@ if __name__ == '__main__':
 fig, ax = plt.subplots()
 
 scenario = ["no migration", "buffer can migrate", "thread can migrate", "thread/buffer can migrate"]
-layout = ["LL", "LD", "DL", "DD", "average"]
+layout = ["LL", "LD", "DL", "DD", "global"]
 score = score[1:]
               
 im, cbar = heatmap(score, scenario, layout, ax=ax,
