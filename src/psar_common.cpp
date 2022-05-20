@@ -34,6 +34,10 @@ struct NumaAvailableChecker {
 	}
 };
 
+/// numa_available must be called before using any other libnuma function
+/// (otherwise the behaviour is undefined).
+/// The only purpose of this variable is to force numa_available to be called
+/// at program startup.
 NumaAvailableChecker s_numa_available_checker;
 
 } // namespace
@@ -348,8 +352,8 @@ void benchmark_reads_simple(const BenchmarkReadsSimpleConfig &config,
 	BenchmarkReadsConfig config_{
 		.allow_migrations_during_reads = config.allow_migrations_during_reads,
 		.bind_read_buffer = false,
-		.pagecache_core = config.pagecache_core,
 		.num_iterations = config.num_iterations,
+		.pagecache_core = config.pagecache_core,
 	};
 
 	for (unsigned int node = 0; node < num_nodes; ++node) {
