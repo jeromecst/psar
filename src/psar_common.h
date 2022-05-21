@@ -197,6 +197,7 @@ struct BenchmarkGetTimesAllConfig {
 	bool bind_read_buffer = false;
 	bool random_reads = false;
 	int num_iterations = 5000;
+	std::string test_file_name = "fichiertest";
 };
 
 /// Measure read times and locality information with the specified config.

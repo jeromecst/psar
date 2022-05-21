@@ -448,6 +448,8 @@ void parse_get_times_all_config(BenchmarkGetTimesAllConfig *config, int argc,
 	CLI::App app;
 	app.add_flag("-r,--random", config->random_reads, "use random reads");
 	app.add_option("-i,--iterations", config->num_iterations);
+	app.add_option("-f,--test-file", config->test_file_name,
+	               "path to the test file to use for reads");
 	app.parse(argc, argv);
 }
 
