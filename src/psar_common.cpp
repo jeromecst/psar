@@ -42,8 +42,6 @@ NumaAvailableChecker s_numa_available_checker;
 
 } // namespace
 
-constexpr const char *TestFileName = "fichiertest";
-
 void drop_caches() {
 	int fd = open("/proc/sys/vm/drop_caches", O_WRONLY);
 	if (write(fd, "1", 1) <= 0) {
@@ -87,9 +85,9 @@ NumaBuffer::~NumaBuffer() {
 		deleter(this);
 }
 
-NumaBuffer make_local_read_buffer() {
+NumaBuffer make_local_read_buffer(const std::string &test_file_name) {
 	struct stat st {};
-	if (stat(TestFileName, &st) != 0) {
+	if (stat(test_file_name.c_str(), &st) != 0) {
 		perror("stat");
 		exit(1);
 	}
@@ -99,9 +97,10 @@ NumaBuffer make_local_read_buffer() {
 	return buffer;
 }
 
-NumaBuffer make_node_bound_read_buffer(unsigned int node) {
+NumaBuffer make_node_bound_read_buffer(unsigned int node,
+                                       const std::string &test_file_name) {
 	struct stat st {};
-	if (stat(TestFileName, &st) != 0) {
+	if (stat(test_file_name.c_str(), &st) != 0) {
 		perror("stat");
 		exit(1);
 	}
@@ -111,10 +110,10 @@ NumaBuffer make_node_bound_read_buffer(unsigned int node) {
 	return buffer;
 }
 
-void read_file(char *buf, size_t size) {
+void read_file(const std::string &name, char *buf, size_t size) {
 	struct stat st {};
 
-	if (stat(TestFileName, &st) != 0) {
+	if (stat(name.c_str(), &st) != 0) {
 		perror("stat");
 		exit(1);
 	}
@@ -122,7 +121,7 @@ void read_file(char *buf, size_t size) {
 	if (!buf || size != size_t(st.st_size))
 		throw std::runtime_error("incorrect buffer size");
 
-	int fd = open(TestFileName, O_RDONLY);
+	int fd = open(name.c_str(), O_RDONLY);
 	if (fd < 0) {
 		perror("open");
 		exit(1);
@@ -140,11 +139,11 @@ void read_file(char *buf, size_t size) {
 	close(fd);
 }
 
-void read_file_random(char *buf, size_t size) {
+void read_file_random(const std::string &name, char *buf, size_t size) {
 	static constexpr size_t ReadChunkSize = 0x2000;
 	struct stat st {};
 
-	if (stat(TestFileName, &st) != 0) {
+	if (stat(name.c_str(), &st) != 0) {
 		perror("stat");
 		exit(1);
 	}
@@ -160,7 +159,7 @@ void read_file_random(char *buf, size_t size) {
 	std::uniform_int_distribution<long> distrib(0,
 	                                            ssize_t(size - ReadChunkSize));
 
-	int fd = open(TestFileName, O_RDONLY);
+	int fd = open(name.c_str(), O_RDONLY);
 	if (fd < 0) {
 		perror("open");
 		exit(1);
@@ -293,15 +292,17 @@ void benchmark_reads(const BenchmarkReadsConfig &config,
 	drop_caches();
 	{
 		setaffinity_node(config.pagecache_core);
-		auto read_buffer = make_local_read_buffer();
-		read_file(read_buffer.data(), read_buffer.size());
+		auto read_buffer = make_local_read_buffer(config.test_file_name);
+		read_file(config.test_file_name, read_buffer.data(),
+		          read_buffer.size());
 	}
 
 	const auto do_benchmark = [&] {
 		setaffinity_node(config.buffer_core);
 		auto read_buffer = config.bind_read_buffer
-		                       ? make_node_bound_read_buffer(config.buffer_core)
-		                       : make_local_read_buffer();
+		                       ? make_node_bound_read_buffer(
+									 config.buffer_core, config.test_file_name)
+		                       : make_local_read_buffer(config.test_file_name);
 
 		// force the thread to be moved to read_core
 		// (even if config.allow_migrations_during_reads is true)
@@ -317,11 +318,14 @@ void benchmark_reads(const BenchmarkReadsConfig &config,
 		for (int i = 0; i < config.num_iterations; ++i) {
 			if (random_reads) {
 				times[i] = time_us([&] {
-					read_file_random(read_buffer.data(), read_buffer.size());
+					read_file_random(config.test_file_name, read_buffer.data(),
+					                 read_buffer.size());
 				});
 			} else {
-				times[i] = time_us(
-					[&] { read_file(read_buffer.data(), read_buffer.size()); });
+				times[i] = time_us([&] {
+					read_file(config.test_file_name, read_buffer.data(),
+					          read_buffer.size());
+				});
 			}
 
 			nodes[i] = get_current_node();
