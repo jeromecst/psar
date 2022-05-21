@@ -53,20 +53,21 @@ void drop_caches();
 
 /// Make a buffer that is as large as the test file
 /// and bind it to the specified node (so that it cannot be migrated).
-NumaBuffer make_node_bound_read_buffer(unsigned int node);
+NumaBuffer make_node_bound_read_buffer(unsigned int node,
+                                       const std::string &test_file_name);
 
 /// Make a buffer that is as large as the test file.
 /// Migrations are allowed.
-NumaBuffer make_local_read_buffer();
+NumaBuffer make_local_read_buffer(const std::string &test_file_name);
 
 /// Read the test file into the specified buffer,
 /// using sequential reads of 0x2000 bytes each.
 /// @param buf_size Buffer size. Must match the file size.
-void read_file(char *buf, size_t buf_size);
+void read_file(const std::string &name, char *buf, size_t buf_size);
 /// Read the test file into the specified buffer,
 /// using random reads (read + random seek) of 0x2000 bytes each.
 /// @param buf_size Buffer size. Must match the file size.
-void read_file_random(char *buf, size_t buf_size);
+void read_file_random(const std::string &name, char *buf, size_t buf_size);
 
 /// Pin the current thread to the specified core.
 void setaffinity(unsigned int core);
@@ -109,6 +110,8 @@ struct BenchmarkReadsConfig {
 	bool random_reads = false;
 	/// number of times the file should be read in its entirety
 	int num_iterations = 5000;
+	/// name of the test file
+	std::string test_file_name = "fichiertest";
 
 	/// core on which the file should be loaded into the page cache
 	int pagecache_core = 0;
